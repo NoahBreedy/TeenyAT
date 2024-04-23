@@ -204,26 +204,33 @@ void rect() {
   int h = abs(lcd_y2 - lcd_y1);
   /* Draw Fill lines */
   if (drawFill) {
+    int min_x = std::min(lcd_x1,lcd_x2);
+    int max_x = std::max(lcd_x1,lcd_x2);
+
+    int min_y = std::min(lcd_y1,lcd_y2);
+    int max_y = std::max(lcd_y1,lcd_y2);
+    
     uint16_t temp = currStrokeColor;
     currStrokeColor = currFillColor;
-    for (int i = 0; i < h - 1; i++) {
-      horizontalLine((lcd_y1 + 1) + i, (lcd_x1 + 1), (lcd_x2 - 1));
+    std::cout << std::abs(max_y-min_y) << std::endl;
+    for (int i = 0; i < std::abs(max_y-min_y) + 1; i++) {
+      horizontalLine((min_y) + i, min_x, max_x );
     }
     currStrokeColor = temp;
   }
-
 }
 
 /* append values to a buffer */
 void buffer_push(int buffer[],int len,int num){
 		int index;
-		for(index = 0; index < len; index++){
-			if(buffer[index] == 0){
-				break;
-			}
-		}
-		if(index >= len) index--;
-		buffer[index] = num;
+		for(index = (len-1); index > -1; index--){
+        if(buffer[index] == 0) break;
+    }
+    if(index >= 0){
+      buffer[index] = num;
+      return;
+    } 
+    buffer_pop(buffer,len);
 }
 
 int buffer_pop(int buffer[],int len){
@@ -233,6 +240,13 @@ int buffer_pop(int buffer[],int len){
 	}
 	buffer[len-1] = 0;
 	return num;
+}
+
+void buffer_print(int buffer[],int len){
+	for(int i = 0; i < (len-1); i++){
+		printf("%d ",buffer[i]);
+	}
+  printf("\n");
 }
 
 /* processes key-board inputs and appends them to buffer */

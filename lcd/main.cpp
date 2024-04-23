@@ -302,6 +302,9 @@ void bus_write(teenyat * /*t*/, tny_uword addr, tny_word data, uint16_t * /*dela
     case POINT:
         point();
         break;
+    case KEY:
+        buffer_push(keyboard_input_buffer,KEYBOARD_INPUT_BUFFER_SIZE,data.u);
+        break;
     case TERM:
         std::cout << "0x" << std::hex << std::setfill('0') << std::setw(4) << data.u;
         std::cout << std::dec << std::setfill(' ') << std::setw(5);

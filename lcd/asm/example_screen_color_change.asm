@@ -26,6 +26,7 @@
     STR [Y2], rA
     STR [DRAWSTROKE], rZ  ;no stroke
 !top
+    str [TERM], rC
     STR [FILL], rC
     STR [RECT], rD
     STR [UPDATE], SP

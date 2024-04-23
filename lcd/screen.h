@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-#define KEYBOARD_INPUT_BUFFER_SIZE 3
+#define KEYBOARD_INPUT_BUFFER_SIZE 8
 
 extern Tigr* window;
 extern int drawStroke;
@@ -54,6 +54,7 @@ void rect();
 // Handles all keyboard presses and adds them to buffer
 void buffer_push(int buffer[], int len,int num);
 int  buffer_pop(int buffer[], int len);
+void buffer_print(int buffer[],int len);
 void process_keyboard_input(Tigr*);
 
 // Just draws pixels
