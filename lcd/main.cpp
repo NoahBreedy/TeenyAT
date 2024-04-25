@@ -133,7 +133,8 @@
 #define UPDATE 0xE000
 #define RECT 0xE010
 #define LINE 0xE011
-#define POINT 0xE012 
+#define POINT 0xE012
+#define CIRCLE 0xE013 
 #define MOUSEX 0xFFFC
 #define MOUSEY 0xFFFD
 #define MOUSEB 0xFFFB 
@@ -151,7 +152,8 @@ int main(int argc, char *argv[])
     }
 
     /* database fabulous lavender for our color model */
-    initScreen(0xA81); 
+//    initScreen(0xA81); 
+    initScreen(0xBE8); 
 
     std::string fileName = argv[1];
     teenyat t;

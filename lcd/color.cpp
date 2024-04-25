@@ -3,6 +3,21 @@
 #include <iostream>
 #include <cmath>
 
+void HSVtoRGB(int H, unsigned char *red, unsigned char *green, unsigned char *blue) {
+    // static const int n_for_gray4_code[] =          {0,  1,  3,  2,   7,   6,  4,  5,  15,  14,  12,  13,   8,   9,  11,  10};
+    // multply the above by 17 to step through 0...255 intensity
+    static const unsigned char gray4_to_intensity[] = {0, 17, 51, 34, 119, 102, 68, 85, 255, 238, 204, 221, 136, 153, 187, 170}; 
+    int gray_code = H ^ (H >> 1);
+    unsigned char r_gray = ((unsigned)gray_code >> 8) & ~(~0U << 4);
+    unsigned char g_gray = ((unsigned)gray_code >> 4) & ~(~0U << 4);
+    unsigned char b_gray = ((unsigned)gray_code >> 0) & ~(~0U << 4);
+    *red = gray4_to_intensity[r_gray];
+    *green = gray4_to_intensity[g_gray];
+    *blue = gray4_to_intensity[b_gray];
+
+    return;
+}
+#if 0
 void HSVtoRGB(int H, unsigned char *red, unsigned char *green, unsigned char *blue)
 {
 
@@ -68,3 +83,4 @@ void HSVtoRGB(int H, unsigned char *red, unsigned char *green, unsigned char *bl
       break;
    }
 }
+#endif
