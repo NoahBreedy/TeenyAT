@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
     /* database fabulous lavender for our color model */
 //    initScreen(0xA81); 
-    initScreen(0xBE8); 
+    initScreen(0xD4F); 
 
     std::string fileName = argv[1];
     teenyat t;
