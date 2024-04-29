@@ -22,8 +22,8 @@
 .const MOUSE_LEFT 1
 .const MOUSE_RIGHT 2
  
-.const MUTATEAMT 50
-.const COLORAMT 50
+.const MUTATEAMT 1
+.const COLORAMT 1
 
 SET rD, 0
 !main

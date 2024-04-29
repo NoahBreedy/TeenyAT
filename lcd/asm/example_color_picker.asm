@@ -33,7 +33,7 @@
 ;;; Draw all 4K colors on the screen
 ;;;
 
-    SET rC, 4096           ; 64x64 = 4096
+    SET rC, 4096          ; 64x64 = 4096
     SET rA, UPDATESCREEN   ; address of next pixel
     SET rB, rZ             ; which color index to render
 !draw_next_color
@@ -55,5 +55,5 @@
     ADD rB, rA + UPDATESCREEN
     LOD rC, [rB]
     STR [TERM], rC 
-
+    DLY 0x7FFF
     JMP !show_color
