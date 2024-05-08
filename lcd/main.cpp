@@ -6,6 +6,8 @@
 #include "teenyat.h"
 #include "util.h"
 
+#include "bin_array.h"
+
 /*
  *  These are the start of the address ranges or the addresses themselves: 
  *  See .... document for more detail 
@@ -143,26 +145,24 @@
 void bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay);
 void bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_t *delay);
 
-int main(int argc, char *argv[])
+int main()
 {   
-    if(argc < 2) {
-        std::cout << "Please provide an binary file" << std::endl;
-        return 1;
-    }
-
     /* database fabulous lavender for our color model */
     initScreen(0xA81); 
 
-    std::string fileName = argv[1];
     teenyat t;
-    FILE *bin_file = fopen(fileName.c_str(), "rb");
-    if(bin_file != NULL) {
-        tny_init_from_file(&t, bin_file, bus_read, bus_write);
-        fclose(bin_file);
-    }else {
-        std::cout << "Failed to init bin file (invalid path?)" << std::endl;
+
+    #ifdef __BINARY_DATA__
+        tny_init_from_header(&t, binary_length, binary_data, bus_read, bus_write);
+        if(!(t.initialized)){
+            printf("Failed to init teenyAT!! \n");
+            return false;
+        }
+    #endif 
+    #ifndef __BINARY_DATA__
+        std::cout << "Failed to init bin file (no header file?)" << std::endl;
         return 0;
-    }
+    #endif
 
     while(!tigrClosed(window) && !tigrKeyDown(window, TK_ESCAPE)) {
         if(current_frame > (gridLength * gridLength * gridLength)){
