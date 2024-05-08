@@ -247,6 +247,10 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
                         TNY_READ_FROM_BUS_FNPTR bus_read,
                         TNY_WRITE_TO_BUS_FNPTR bus_write);
 
+bool tny_init_from_header(teenyat *t, const int bin_length,const uint16_t bin_data[],
+                        TNY_READ_FROM_BUS_FNPTR bus_read,
+                        TNY_WRITE_TO_BUS_FNPTR bus_write);
+
 /**
  * @brief
  *   Reinitialize the TeenyAT

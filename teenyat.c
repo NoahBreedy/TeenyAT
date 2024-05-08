@@ -74,6 +74,32 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
 	return true;
 }
 
+bool tny_init_from_header(teenyat *t, const int bin_length,const uint16_t bin_data[],
+                        TNY_READ_FROM_BUS_FNPTR bus_read,
+                        TNY_WRITE_TO_BUS_FNPTR bus_write) {
+	if(!t) return false;
+	t->initialized = false;
+	if(!bin_data) return false;
+	if(!bus_read || !bus_write) return false;
+	if(bin_length <= 0) return false;
+
+	/* Clear the entire instance */
+	memset(t, 0, sizeof(teenyat));
+
+	/* Initalize binary image */
+	memcpy(t->bin_image, bin_data, sizeof(tny_word) * bin_length);
+	
+	/* store bus callbacks */
+	t->bus_read = bus_read;
+	t->bus_write = bus_write;
+
+	if(!tny_reset(t)) return false;
+
+	t->initialized = true;
+
+	return true;
+}
+
 bool tny_reset(teenyat *t) {
 	if(!t) return false;
 
@@ -138,7 +164,7 @@ void tny_clock(teenyat *t) {
 	bool equals = IR.inst_flags.equals;
 	bool less = IR.inst_flags.less;
 	bool greater = IR.inst_flags.greater;
-
+	
 	if(teeny) {
 		/*
 		 * This is a single word instruction encoding
