@@ -1,18 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
 /* 
 *   The stuff with reading from a bin file was chat gpt generated
 *   so (thats why its redundant) I didnt want to do it myself
-*   but the bin_array.h output was written by me 
+*   but the default.h output was written by me 
 *   
 *   build: gcc .\bin_to_hex.c -o convert
-*   usage: ./convert <bin_file>
+*   usage: ./convert <bin_file> (optional)<bin_name>
 */
+
+void string_toupper(char s[],char s_up[]){
+    unsigned int s_len = strlen(s);
+    int a;
+    for ( a = 0; a < s_len; a++)
+    { 
+        s_up[a] = toupper(s[a]); 
+    }
+    s_up[a] = '\0';
+}
 
 int main(int argc, char* argv[]) {
     
-    if(argc != 2){
-        printf("Usage ./convert <bin_file> \n");
+    if(argc < 2 || argc > 3){
+        printf("Usage ./convert <bin_file> (optional)<bin_name>\n");
         return 1;
     }
     
@@ -22,25 +35,35 @@ int main(int argc, char* argv[]) {
     long file_len;
     int i;
 
-    // Open the file in binary mode
     read_ptr = fopen(argv[1], "rb"); 
     if (!read_ptr) {
         perror("Error opening read file");
         return 1;
     }
 
-    write_ptr = fopen("bin_array.h", "w"); 
+    char* name = "default";
+    if(argc == 3){
+        name = argv[2];
+    }
+
+    char name_upper[strlen(name)];
+    string_toupper(name,name_upper);
+
+    char name_buffer[strlen(name)+5];
+    sprintf(name_buffer,"%s.h",name);
+
+    write_ptr = fopen(name_buffer, "w"); 
     if (!write_ptr) {
         perror("Error opening write file");
         return 1;
     }
 
-    // Get the file length
+    /* Get the file length */
     fseek(read_ptr, 0, SEEK_END);
     file_len = ftell(read_ptr);
     fseek(read_ptr, 0, SEEK_SET);
 
-    // Allocate memory for the buffer
+    /* Allocate memory for the buffer */ 
     buffer = (unsigned char *)malloc(file_len);
     if (!buffer) {
         fprintf(stderr, "Memory allocation failed\n");
@@ -48,11 +71,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Read the file into the buffer
     fread(buffer, file_len, 1, read_ptr);
     fclose(read_ptr);
-    fprintf(write_ptr,"#ifndef __BINARY_DATA__\n#define __BINARY_DATA__\n");
-    fprintf(write_ptr, "#include <stdint.h>\nconst int binary_length = %d;\nconst uint16_t binary_data[] = {\n",(file_len/2));
+    fprintf(write_ptr,"#ifndef __%s_BINARY_DATA__\n#define __%s_BINARY_DATA__\n",name_upper,name_upper);
+    fprintf(write_ptr, "#include <stdint.h>\nconst int %s_binary_length = %d;\nconst uint16_t %s_binary_data[] = {\n",name,(file_len/2),name);
     for (i = 0; i < file_len-1; i+=2) {
 
         if(i != file_len-2)
@@ -64,9 +86,8 @@ int main(int argc, char* argv[]) {
             fprintf(write_ptr, "\n");
         }
     }
-    fprintf(write_ptr, "\n};\n#endif /* __BINARY_DATA__ */");
+    fprintf(write_ptr, "\n};\n#endif /* __%s_BINARY_DATA__ */",name_upper);
     
-    // Free allocated memory
     free(buffer);
 
     return 0;
