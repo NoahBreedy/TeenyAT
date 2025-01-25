@@ -30,7 +30,7 @@ int old_callback = 0;
 int old_frequency_1 = 0;
 int old_callback_1 = 0;
 
-int audio_device_init(){
+int audio_device_init(void){
     
     /* Initialize sine wave configuration */
     sine_audio_data.wave_position = 0.0f;
@@ -175,7 +175,7 @@ void play_sound(int frequency,int channel){
     *old_freq = real_frequency;
 }
 
-void free_audio(){
+void free_audio(void){
     ma_device_uninit(&sine_audio_device);
     ma_device_uninit(&tri_audio_device);
     ma_device_uninit(&sine_audio_device_1);
