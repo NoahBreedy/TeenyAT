@@ -1,5 +1,4 @@
-; Blink the onboard led with the teenyAT
-; Stores to light on will automaticaly delay the amount in the register
+; The goat himself
 
 .const UPDATE_SCREEN 0x8000
 .const UPDATE 0xE000
