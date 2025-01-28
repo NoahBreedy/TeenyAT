@@ -2,6 +2,7 @@
 #include "miniaudio.h"
 #include <iostream>
 #include <chrono>
+#include <cstdint>
 #include <thread>
 
 #include "teenyat.h"
@@ -164,6 +165,9 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    /* Calibrate clock timing for host device */
+    uint64_t clock_wait_time = calibrate_teeny_clock(1);
+
     int failed_audio_init = audio_device_init();
     if(failed_audio_init){
         std::cout << "Failed to initialize audio" << std::endl;
@@ -180,7 +184,14 @@ int main(int argc, char* argv[])
     while(!tigrClosed(window) && !tigrKeyDown(window, TK_ESCAPE)) {
         process_mouse(&t);
         process_keyboard(&t);
-        if(!CLOCK_PAUSED) tny_clock(&t);
+        
+        if(!CLOCK_PAUSED){
+            tny_clock(&t);
+            /* Busy wait to hopefully fix the cycle rate */
+            for(volatile uint64_t i = 0; i < clock_wait_time; i++){
+            }
+        } 
+
         auto now = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_update_time);
         
