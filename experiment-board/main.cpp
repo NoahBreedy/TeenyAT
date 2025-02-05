@@ -145,7 +145,7 @@
 void bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay);
 void bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_t *delay);
 void port_change(teenyat *t, bool is_port_a, tny_word port);
-
+long num;
 int main(int argc, char* argv[])
 {  
     if(argc < 2) {
@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
         }
     }
 
+    tny_stats(&t);
     kill_board();
     free_audio();
     return EXIT_SUCCESS;

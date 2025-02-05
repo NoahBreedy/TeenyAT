@@ -112,6 +112,8 @@ typedef void(*TNY_PORT_CHANGE_FNPTR)(teenyat *t, bool is_port_a, tny_word port);
 
 #define TNY_BUS_DELAY 3
 
+void tny_stats(teenyat *t);
+
 union tny_word {
 	struct {
 		tny_sword immed4  : 4;

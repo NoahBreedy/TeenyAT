@@ -14,6 +14,8 @@
 
 #include "teenyat.h"
 
+struct timespec start_time;
+
 tny_uword tny_random(teenyat *t);
 
 static void set_elg_flags(teenyat *t, tny_sword alu_result) {
@@ -73,6 +75,8 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
 	if(!tny_reset(t)) return false;
 
 	t->initialized = true;
+
+	clock_gettime(CLOCK_REALTIME, &start_time);
 
 	return true;
 }
@@ -627,4 +631,37 @@ tny_uword tny_random(teenyat *t) {
 
 	/* truncate result and return as 16-bit tny_uword */
     return (tny_uword)result;
+}
+
+void tny_stats(teenyat *t) {
+    FILE *stats_file = fopen("stats.txt", "w");
+    if (!stats_file) {
+        printf("Error: Can not open stats.txt\n");
+        return;
+    }
+
+    struct timespec end_time;
+    clock_gettime(CLOCK_REALTIME, &end_time);
+
+    uint64_t start_time_ns = (uint64_t)start_time.tv_sec * 1000000000 + start_time.tv_nsec;
+    uint64_t end_time_ns = (uint64_t)end_time.tv_sec * 1000000000 + end_time.tv_nsec;
+    uint64_t total_runtime_ns = end_time_ns - start_time_ns;
+
+    double total_runtime_sec = total_runtime_ns / 1000000000.0;
+    double total_runtime_us = total_runtime_ns / 1000.0;
+    double avg_clock_speed_us = (double)t->cycle_cnt / total_runtime_us;
+    double avg_clock_speed_sec = (double)t->cycle_cnt / total_runtime_sec;
+
+    fprintf(stats_file, "TeenyAT clocked %lu cycles \n", t->cycle_cnt);
+    fprintf(stats_file, "====================\n");
+    fprintf(stats_file, "TeenyAT Runtime: %.3f microseconds\n", total_runtime_us); 
+    fprintf(stats_file, "TeenyAT Runtime: %.9f seconds\n", total_runtime_sec);
+    fprintf(stats_file, "====================\n");
+    fprintf(stats_file, "(Avg) Clock speed: %.6f cycles per microsecond\n", avg_clock_speed_us);
+    fprintf(stats_file, "(Avg) Clock speed: %.6f cycles per second\n", avg_clock_speed_sec);
+    fprintf(stats_file, "====================\n");
+    fprintf(stats_file, "(Avg) Clock speed: %.6f KHz\n", avg_clock_speed_us * 1000);
+    fprintf(stats_file, "(Avg) Clock speed: %.6f MHz\n", avg_clock_speed_us);
+
+    fclose(stats_file);
 }
