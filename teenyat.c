@@ -110,12 +110,13 @@ bool tny_init_clocked(teenyat *t, FILE *bin_file,
 	uint16_t MHz){
 	
 	if(!t) return false;
-
 	/* Cannot have negative or zero pace_divisor */
-	if(MHz <= 0 ) return false;
+	if(MHz == 0 ) return false;
+
+	bool result = tny_init_from_file(t,bin_file,bus_read,bus_write);
 	t->clock_manager.pace_divisor = MHz;
 
-	return tny_init_from_file(t,bin_file,bus_read,bus_write);
+	return result;
 }
 
 bool tny_init_unclocked(teenyat *t, FILE *bin_file,
@@ -200,14 +201,11 @@ bool tny_reset(teenyat *t) {
 
 	
 	/* Set up our clock manager with appropriate timing variables */
-	if(!t->clock_manager.pace_divisor){
-		t->clock_manager.pace_divisor = 1;
-	} 
+
 	t->clock_manager.pace_cnt = t->clock_manager.initial_pace_cnt;
 
 	t->delay_cycles = 0;
 	t->cycle_cnt = 0;
-
 	return true;
 }
 
