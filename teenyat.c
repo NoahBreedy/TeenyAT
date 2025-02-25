@@ -678,7 +678,7 @@ void tny_clock(teenyat *t) {
 	    uint64_t now_us = us_clock();
 	    uint64_t us_elapsed = now_us - (t->clock_manager.pace_start);
 
-		t->clock_manager.clock_wait_time = ((t->clock_manager.clock_wait_time) * (t->clock_manager.pace_cnt) / (t->clock_manager.pace_divisor)) / us_elapsed;
+		t->clock_manager.clock_wait_time = ((t->clock_manager.clock_wait_time) * (t->clock_manager.initial_pace_cnt) / (t->clock_manager.pace_divisor)) / us_elapsed;
 
 		if((now_us - t->clock_manager.clock_epoch) > t->cycle_cnt) {
 			/* too slow, speed up by busy looping less */
@@ -739,7 +739,7 @@ tny_uword tny_random(teenyat *t) {
  * a busy loop to consume 1 us (clock period for 1 MHz).
  */ 
 uint64_t tny_calibrate_1_MHZ(void){
-    const uint64_t TRIAL_CNT = UINT32_MAX;
+    const uint64_t TRIAL_CNT = 5212004;
     uint64_t start = us_clock();
 
     /* consume some real world time with empty loop */
