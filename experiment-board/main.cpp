@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     }
 
     /* Calibrate clock timing for host device */
-    uint64_t clock_wait_time = calibrate_teeny_clock(1);
+    // uint64_t clock_wait_time = calibrate_teeny_clock(1);
 
     int failed_audio_init = audio_device_init();
     if(failed_audio_init){
@@ -187,9 +187,6 @@ int main(int argc, char* argv[])
         
         if(!CLOCK_PAUSED){
             tny_clock(&t);
-            /* Busy wait to hopefully fix the cycle rate */
-            for(volatile uint64_t i = 0; i < clock_wait_time; i++){
-            }
         } 
 
         auto now = std::chrono::steady_clock::now();
