@@ -201,7 +201,9 @@ bool tny_reset(teenyat *t) {
 
 	
 	/* Set up our clock manager with appropriate timing variables */
-
+	if(t->clock_manager.pace_divisor == 0){
+		t->clock_manager.pace_divisor = 1;
+	}
 	t->clock_manager.pace_cnt = t->clock_manager.initial_pace_cnt;
 
 	t->delay_cycles = 0;
