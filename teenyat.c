@@ -13,6 +13,7 @@
 #include <time.h>
 
 #include "teenyat.h"
+#include "mapping.h"
 
 /**
   * 	Platform Independent microsecond clock function  
@@ -99,6 +100,8 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
     t->clock_manager.pace_divisor = 1;
  
 	if(!tny_reset(t)) return false;
+
+	t->teeny_address_log = fopen("log.txt", "w");;	
 
 	t->initialized = true;
 
@@ -314,19 +317,39 @@ void tny_clock(teenyat *t) {
 		bool equals = IR.inst_flags.equals;
 		bool less = IR.inst_flags.less;
 		bool greater = IR.inst_flags.greater;
+		
+		if(teeny) immed = IR.instruction.immed4;
+
+		char sign = '+';
+		if(immed < 0) sign = '-';
+		tny_uword temp_immed = abs(immed); 
+		if(opcode == TNY_OPCODE_JMP){
+			fprintf(t->teeny_address_log, "%s r%s, r%s %c %d\n",tny_opcodes_jump_strings[IR.instruction.immed4], tny_registers_strings[reg1], tny_registers_strings[reg2],sign, immed);
+		}else if(opcode != TNY_OPCODE_STR && opcode != TNY_OPCODE_LOD){
+			fprintf(t->teeny_address_log, "%s r%s, r%s %c %d\n",tny_opcodes_strings[opcode], tny_registers_strings[reg1], tny_registers_strings[reg2],sign, immed);
+		}else{
+			if(opcode == TNY_OPCODE_STR){
+				fprintf(t->teeny_address_log, "%s [ r%s + 0x%04x ], r%s\n",tny_opcodes_strings[opcode], tny_registers_strings[reg1], immed, tny_registers_strings[reg2]);
+			}else{
+				fprintf(t->teeny_address_log, "%s r%s, [ r%s + 0x%04x ]\n",tny_opcodes_strings[opcode], tny_registers_strings[reg1], tny_registers_strings[reg2], immed);
+			}
+		}
 
 		if(teeny) {
 			/*
 			* This is a single word instruction encoding
 			*/
 			dec_pc(t);
-			immed = IR.instruction.immed4;
+			fprintf(t->teeny_address_log, "I0: 0x%04x \t",(t->reg[TNY_REG_PC].u - 1));
+			fprintf(t->teeny_address_log, "D:  0x%04x\n\n",(immed));
 		}
 		else {
 			/* double word instructions cost one extra cycle */
 			t->delay_cycles++;
+			fprintf(t->teeny_address_log, "I0: 0x%04x\n",(t->reg[TNY_REG_PC].u - 2));
+			fprintf(t->teeny_address_log, "I1: 0x%04x \t",(t->reg[TNY_REG_PC].u - 1));
+			fprintf(t->teeny_address_log, "D:  0x%04x\n\n",(immed));
 		}
-
 		/*
 		* EXECUTE
 		*/

@@ -21,18 +21,31 @@ void bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay);
 void bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_t *delay);
 
 int main(int argc, char *argv[]) {
-	if(argc != 2) {
+	if(argc < 2) {
 		fprintf(stderr, "usage:  %s <bin_file>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
+
+	int loop_cnt = (1 << 6);
+	if(argc == 3){
+		loop_cnt = atoi(argv[2]);
+	}
+
 	FILE *bin_file = fopen(argv[1], "rb");
 	teenyat t;
 	tny_init_from_file(&t, bin_file, bus_read, bus_write);
-
-	for(int i = 0; i < 123456; i++) {
+	//int old_pc = 0; 
+	for(int i = 0; i < loop_cnt; i++) {
 		tny_clock(&t);
+		// if(t.reg[TNY_REG_B].u == 1 ){  // rB is our flag variable
+		// 	printf("CYCLES:  %d\n", t.cycle_cnt);
+		// 	printf("PC: %d\n",t.reg[TNY_REG_PC].u);
+		// 	printf("DELAY: %d\n\n", t.delay_cycles);
+		// 	break;
+		// }
+		//old_pc = t.reg[TNY_REG_PC].u;
 	}
-
+	
 	return EXIT_SUCCESS;
 }
 

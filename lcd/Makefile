@@ -16,12 +16,8 @@ endif
 
 all:
 	gcc -c tigr.c -o tigr.o $(CFLAGS) 
-	gcc -c ../teenyat.c -o teenyat.o $(CFLAGS) $(WFLAGS)
-	g++ -c color.cpp -o color.o $(CPPFLAGS) $(WFLAGS)
-	g++ -c util.cpp -o util.o $(CPPFLAGS) $(WFLAGS)
-	g++ -c screen.cpp -o screen.o $(CPPFLAGS) $(WFLAGS)
-	g++ -c main.cpp -o main.o $(CPPFLAGS) $(WFLAGS)
-	g++ tigr.o screen.o teenyat.o main.o color.o util.o -o lcd $(LDFLAGS)
+	gcc -c test.c -o test.o $(CFLAGS) 
+	gcc tigr.o test.o -o test $(LDFLAGS)
 
 clean:
-	$(RMCMD) lcd *.o
+	$(RMCMD) test *.o

@@ -270,6 +270,9 @@ struct teenyat {
 		/* The initial pace count to start at effects how often we update */
 		int16_t initial_pace_cnt;
 	} clock_manager;
+	
+	FILE *teeny_address_log;
+
 	/**
 	 * The number of cycles this instance has been running since initialization
 	 * or reset.
