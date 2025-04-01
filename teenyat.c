@@ -83,6 +83,12 @@ static void default_bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_
 	return;
 }
 
+static void default_debug_callback(teenyat */*t*/){
+	return;
+}
+
+int TNY_BUG = 0;
+
 bool tny_init_from_file(teenyat *t, FILE *bin_file,
                         TNY_READ_FROM_BUS_FNPTR bus_read,
                         TNY_WRITE_TO_BUS_FNPTR bus_write) {
@@ -104,7 +110,7 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
 	t->clock_manager.initial_pace_cnt = TNY_DEFAULT_PACE_CNT;
     t->clock_manager.clock_wait_time = tny_calibrate_1_MHZ();
     t->clock_manager.pace_divisor = 1;
- 
+
 	if(!tny_reset(t)) return false;
 
 	t->initialized = true;
@@ -683,7 +689,7 @@ void tny_clock(teenyat *t) {
 		/* Ensure the zero register still has a zero in it */
 		t->reg[TNY_REG_ZERO].u = 0;
 	}
-
+	
 	/* Jump out if unclocked instance of the TeenyAT */
 	if(t->clock_manager.pace_cnt < 0) return;
 	

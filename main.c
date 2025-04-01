@@ -16,6 +16,7 @@
 #include <stdlib.h>
 
 #include "teenyat.h"
+#include "teenybug.h" 
 
 void bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay);
 void bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_t *delay);
@@ -25,11 +26,12 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "usage:  %s <bin_file>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
+
 	FILE *bin_file = fopen(argv[1], "rb");
 	teenyat t;
 	tny_init_from_file(&t, bin_file, bus_read, bus_write);
 
-	for(int i = 0; i < 123456; i++) {
+	while(1) {
 		tny_clock(&t);
 	}
 

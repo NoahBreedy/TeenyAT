@@ -25,3 +25,5 @@ all:
 
 clean:
 	$(RMCMD) lcd *.o
+
+

@@ -20,6 +20,8 @@ extern "C" {
 
 #endif // __cplusplus
 
+extern int TNY_BUG;
+
 typedef struct teenyat teenyat;
 
 typedef uint16_t tny_uword;
@@ -96,6 +98,9 @@ typedef void(*TNY_WRITE_TO_BUS_FNPTR)(teenyat *t, tny_uword addr, tny_word data,
  *   The updated externally held pin levels for the modified port
  */
 typedef void(*TNY_PORT_CHANGE_FNPTR)(teenyat *t, bool is_port_a, tny_word port);
+
+
+typedef void(*TNY_DEBUG_CALLBACK)(teenyat *t);
 
 /** While the TeenyAT has a 16 bit address space, RAM is only 32K words */
 #define TNY_RAM_SIZE 0x8000
@@ -209,6 +214,9 @@ struct teenyat {
 	 * System calllback function to handle TeenyAT write requests
 	 */
 	TNY_WRITE_TO_BUS_FNPTR bus_write;
+
+	TNY_DEBUG_CALLBACK debug_callback;
+
 	/**
 	 * The number of remaining cycles to delay to simulate the cost of the
 	 * previous instruction.
