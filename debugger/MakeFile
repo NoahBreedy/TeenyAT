@@ -1,0 +1,29 @@
+CFLAGS += -I.. -I./include -Os 
+WFLAGS = -Wall -Wextra -Wpedantic
+CPPFLAGS += $(CFLAGS) --std=c++17
+ifeq ($(OS),Windows_NT)
+	LDFLAGS += -s -lopengl32 -lgdi32
+	RMCMD = del 
+else
+	RMCMD = rm -f
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		LDFLAGS += -framework OpenGL -framework Cocoa
+	else ifeq ($(UNAME_S),Linux)
+		LDFLAGS += -s -lGLU -lGL -lX11
+	endif
+endif
+
+all:
+	gcc -c tigr.c -o tigr.o $(CFLAGS) 
+	gcc -c teenyat.c -o teenyat.o $(CFLAGS) $(WFLAGS) 
+	g++ -c debug.cpp -o debug.o $(CPPFLAGS) $(WFLAGS) 
+	g++ tigr.o teenyat.o debug.o -o debug $(LDFLAGS)	
+	g++ -c sys.cpp -o sys.o $(CPPFLAGS) $(WFLAGS)
+	g++ sys.o teenyat.o -o system $(LDFLAGS)
+
+
+clean:
+	$(RMCMD) debug *.o
+
+
