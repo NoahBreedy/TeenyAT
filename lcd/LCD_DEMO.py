@@ -22,14 +22,19 @@ def main():
     #         command = ["../../tnasm/tnasm.exe", asm_file]
     #         run_with_timeout(command)
     #         time.sleep(0.1)
-
     while True:
+        i = 0
         for bin_file in glob.glob("*.bin",root_dir="C:/Users/noahf/OneDrive/Desktop/TeenyAT/lcd/bin"):
             print(f"Processing: {bin_file}")
             bin_file = "./bin/" + bin_file
             command = ["./lcd", bin_file]
-            run_with_timeout(command, 20)
+            timer = 20
+            if(i == 1 or i == 9):
+                timer = 5
+            run_with_timeout(command, timer)
             time.sleep(0.1)
+            i += 1
 
 if __name__ == "__main__":
     main()
+

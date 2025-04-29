@@ -42,7 +42,7 @@ SET rE, 0
     STR [Y2], rD
     STR [STROKE], rE
     STR [LINE],rZ
-    STR [UPDATE], rZ
+    ; get rid of this STR [UPDATE], rZ
     RET
     
 !down 

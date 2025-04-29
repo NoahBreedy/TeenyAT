@@ -154,10 +154,15 @@ int main(int argc, char *argv[])
     initScreen(0xA81); 
 
     std::string fileName = argv[1];
+    std::string subString = "game";
     teenyat t;
     FILE *bin_file = fopen(fileName.c_str(), "rb");
     if(bin_file != NULL) {
-        tny_init_from_file(&t, bin_file, bus_read, bus_write);
+        if(fileName.find(subString) != std::string::npos){
+            tny_init_unclocked(&t, bin_file, bus_read, bus_write);
+        }else{
+            tny_init_from_file(&t, bin_file, bus_read, bus_write);
+        }
         fclose(bin_file);
     }else {
         std::cout << "Failed to init bin file (invalid path?)" << std::endl;

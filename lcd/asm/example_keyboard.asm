@@ -32,20 +32,33 @@ set rB, 20
 set rC, 0
 
 !main
-    LOD rD, [KEY]
+    LOD rD, [RAND]
+    MOD rD, 8
   
     ; Player Movement
-    CMP rD, 'W'
+    CMP rD, 0
     JE !UP
 
-    CMP rD, 'S'
+    CMP rD, 1
     JE !DOWN
 
-    CMP rD, 'A'
+    CMP rD, 2
     JE !LEFT
 
-    CMP rD, 'D'
+    CMP rD, 3
     JE !RIGHT
+
+    CMP rD, 4
+    JE !UP_LEFT
+
+    CMP rD, 5
+    JE !UP_RIGHT
+
+    CMP rD, 6
+    JE !DOWN_LEFT
+
+    CMP rD, 7
+    JE !DOWN_RIGHT
 
     !end_movement
         ADD rE, COLORAMT
@@ -79,5 +92,41 @@ set rC, 0
 !RIGHT
     CMP rA, 63
     JGE !end_movement
+    INC rA
+    JMP !end_movement
+
+!UP_LEFT
+    CMP rB, 0
+    JLE !end_movement
+    DEC rB
+    CMP rA, 0
+    JLE !end_movement
+    DEC rA
+    JMP !end_movement
+
+!UP_RIGHT
+    CMP rB, 0
+    JLE !end_movement
+    DEC rB
+    CMP rA, 0
+    JLE !end_movement
+    INC rA
+    JMP !end_movement
+
+!DOWN_LEFT
+    CMP rB, 0
+    JLE !end_movement
+    INC rB
+    CMP rA, 0
+    JLE !end_movement
+    DEC rA
+    JMP !end_movement
+
+!DOWN_RIGHT
+    CMP rB, 0
+    JLE !end_movement
+    INC rB
+    CMP rA, 0
+    JLE !end_movement
     INC rA
     JMP !end_movement

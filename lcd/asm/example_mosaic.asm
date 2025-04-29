@@ -36,8 +36,7 @@ jmp !loop
     LOD rA, [KEY]
     CMP rA, 65 ; A KEY
     JE !loop
-    CMP rA, 83 ; S Key 
-    JE !mutate
+    JMP !mutate
     JMP !main
 !loop
     ; get random x1 and y1 values
