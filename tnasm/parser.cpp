@@ -7,6 +7,7 @@
 #include "token.h"
 #include "parser.h"
 #include "listing.h"
+#include "warnings.h"
 
 using namespace std;
 
@@ -21,8 +22,8 @@ unsigned int tnext;  // index of the next token in the line to consider
 int pass;
 tny_uword address;
 
-map <string, tny_word> constants;
-map <string, tny_word> variables;
+map <string, identifier_data> constants;
+map <string, identifier_data> variables;
 
 map <string, tny_word> labels;
 bool labels_updated_this_pass;
@@ -31,7 +32,9 @@ bool parse(token_lines &parse_lines, vector <string> asm_lines);
 
 shared_ptr <token> term(token_type id);
 bool p_loc();
-shared_ptr <token> p_variable_line();
+bool p_variable_line();
+shared_ptr <token> p_variable_line_empty();
+shared_ptr <token> p_variable_line_immediate();
 shared_ptr <token> p_constant_line();
 bool p_raw_line();
 shared_ptr <token> p_label_line();
@@ -110,7 +113,7 @@ bool parse(token_lines &parse_lines, vector <string> asm_lines) {
         parse_line = line;
         if(p_loc() == false) {
             result = false;
-            cerr << "Error, line(" << line_no << "): " << asm_lines[line_no - 1] << endl;
+            cerr << "ERROR, line " << line_no << ": " << asm_lines[line_no - 1] << endl;
         }
     }
 
@@ -158,10 +161,6 @@ bool parse(token_lines &parse_lines, vector <string> asm_lines) {
             }
             listing_blocks.push_back(lb);
         }
-    }
-
-    if(result) {
-        cerr << "All labels resolved after " << pass << " passes." << endl << endl;
     }
 
     return result;
@@ -214,30 +213,98 @@ bool p_loc() {
            (tnext = save, p_code_15_line());
 }
 
+bool p_variable_line() {
+    int save = tnext;
+    return (tnext = save, p_variable_line_empty())     ||
+           (tnext = save, p_variable_line_immediate());
+}
+
+bool new_identifier(shared_ptr <token> ident, tny_word val, bool is_constant) {
+    bool is_new_identifier = false;
+    bool constant_exists = (constants.count(ident->token_str) > 0);
+    bool variable_exists = (variables.count(ident->token_str) > 0);
+    if(!constant_exists && !variable_exists) {
+        /* New identifier found */
+        is_new_identifier = true;
+        identifier_data tmp;
+        tmp.addr.u = address;
+        tmp.val = val;
+        tmp.line_no = ident->line_no;
+        if(is_constant) {
+            constants[ident->token_str] = tmp;
+        }
+        else {
+            variables[ident->token_str] = tmp;
+        }
+    }
+    else {
+        cerr << "ERROR, line " << ident->line_no << ": ";
+        cerr << (constant_exists ? "Constant" : "Variable") << " \""
+             << ident->token_str << "\" already defined on line ";
+        if(constant_exists) {
+            cerr << constants[ident->token_str].line_no << endl;
+        }
+        else {
+            cerr << variables[ident->token_str].line_no << endl;
+        }
+    }
+
+    return is_new_identifier;
+}
+
+bool new_constant(shared_ptr <token> ident, tny_word val) {
+    return new_identifier(ident, val, true);
+}
+
+bool new_variable(shared_ptr <token> ident, tny_word val) {
+    return new_identifier(ident, val, false);
+}
+
+/*
+ * variable_line ::= VARIABLE IDENTIFIER.
+ */
+shared_ptr <token> p_variable_line_empty() {
+    shared_ptr <token> val = nullptr, ident;
+    if(term(T_VARIABLE) && (ident = term(T_IDENTIFIER)) && term(T_EOL)) {
+        val = ident;
+        if(pass == 1) {
+            if(!new_variable(ident, tny_word{.u = 0})) {
+                val = nullptr;
+            }
+            
+            if(address == 0x0000) {
+                new_warning(ident->line_no, "A variable at address 0x0000 is unsafe.  It will be executed as code.");
+            }
+        }
+        else if(pass > 1) {
+            bin_words.push_back({.u = 0});
+        }
+        address++;
+    }
+    return val;
+}
+
 /*
  * variable_line ::= VARIABLE IDENTIFIER immediate.
  */
-shared_ptr <token> p_variable_line() {
+shared_ptr <token> p_variable_line_immediate() {
     shared_ptr <token> val = nullptr, ident;
     shared_ptr <tny_word> immed;
     if(term(T_VARIABLE) && (ident = term(T_IDENTIFIER)) && (immed = p_immediate()) && term(T_EOL)) {
+        val = ident;
         if(pass == 1) {
-            bool constant_exists = (constants.count(ident->token_str) > 0);
-            bool variable_exists = (variables.count(ident->token_str) > 0);
-            if(!constant_exists && !variable_exists) {
-                /* New variable found */
-                variables[ident->token_str] = tny_word{.u = address};
+            if(!new_variable(ident, *immed)) {
+                val = nullptr;
             }
-            else {
-                cerr << "ERROR, Line " << ident->line_no << ": ";
-                cerr << (constant_exists ? "Constant" : "Variable") << " \""  << ident->token_str << "\" already defined" << endl;
+            
+            if(address == 0x0000) {
+                new_warning(ident->line_no, "A variable at address 0x0000 is unsafe.  It will be executed as code.");
             }
         }
         else if(pass > 1) {
             bin_words.push_back(*immed);
-        } // TODO: put the immediate in the binary at this address
+        }
         address++;
-        val = ident;
     }
     return val;
 }
@@ -249,25 +316,18 @@ shared_ptr <token> p_constant_line() {
     shared_ptr <token> val = nullptr, ident;
     shared_ptr <tny_word> immed;
     if(term(T_CONSTANT) && (ident = term(T_IDENTIFIER)) && (immed = p_immediate()) && term(T_EOL)) {
+        val = ident;
         if(pass == 1) {
-            bool constant_exists = (constants.count(ident->token_str) > 0);
-            bool variable_exists = (variables.count(ident->token_str) > 0);
-            if(!constant_exists && !variable_exists) {
-                /* New constant found */
-                constants[ident->token_str] = *immed;
-            }
-            else {
-                cerr << "ERROR, Line " << ident->line_no << ": ";
-                cerr << (constant_exists ? "Constant" : "Variable") << " \""  << ident->token_str << "\" already defined" << endl;
+            if(!new_constant(ident, *immed)) {
+                val = nullptr;
             }
         }
-        val = ident;
     }
     return val;
 }
 
 /*
- * raw_line ::= (raw_value | string)+.
+ * raw_line ::= RAW (immediate | string)+.
  * We'll implement the "one-or-more" NUMBER check manually rather than via the
  * recursive descent approach.
  */
@@ -275,11 +335,15 @@ bool p_raw_line() {
     vector <shared_ptr <tny_word> > data;
     bool all_good = true;
 
+    if(term(T_RAW) == nullptr) {
+        all_good = false;
+    }
+
     while(all_good) {
         int save = tnext;
         shared_ptr <tny_word> d;
         shared_ptr <token> val = nullptr;
-        if((d = p_raw_value())) {
+        if((d = p_immediate())) {
             data.push_back(d);
         }
         else if((tnext = save, (val = term(T_STRING)))) {
@@ -363,7 +427,7 @@ shared_ptr <token> p_label_line() {
                 val = label;
             }
             else {
-                cerr << "ERROR, Line " << label->line_no << ": ";
+                cerr << "ERROR, line " << label->line_no << ": ";
                 cerr << "Label " << label->token_str << " already defined at 0x";
                 cerr << hex << setw(4) << setfill('0');
                 cerr << labels[label->token_str].u;
@@ -372,10 +436,6 @@ shared_ptr <token> p_label_line() {
         }
         else if(pass > 1) {
             if(address != labels[label->token_str].u) {
-                cerr << label->token_str << " changed from ";
-                cerr << hex << labels[label->token_str].u << dec << " to ";
-                cerr << hex << address << " in pass " << dec << pass << endl;
-
                 labels[label->token_str] = tny_word{.u = address};
                 labels_updated_this_pass = true;
             }
@@ -407,7 +467,7 @@ shared_ptr<tny_word> p_raw_value() {
 }
 
 /*
- * immediate ::= number.
+ * immediate ::= raw_value.
  * immediate ::= LABEL.
  * immediate ::= IDENTIFIER.
  */
@@ -416,10 +476,7 @@ shared_ptr <tny_word> p_immediate() {
     shared_ptr <token> ident, label;
     int save = tnext;
 
-    if((tnext = save, val = p_raw_value())) {
-        /* nothing to do */
-    }
-    else if((tnext = save, label = term(T_LABEL))) {
+    if((tnext = save, label = term(T_LABEL))) {
         /* TODO: look up label's address */
         if(pass == 1) {
             /*
@@ -434,7 +491,7 @@ shared_ptr <tny_word> p_immediate() {
                 val = shared_ptr <tny_word>(new tny_word(labels[label->token_str]));
             }
             else {
-                cerr << "Error, Line(" << label->line_no << "): ";
+                cerr << "ERROR, line " << label->line_no << ": ";
                 cerr << label->token_str << " is not defined" << endl;
             }
         }
@@ -443,17 +500,30 @@ shared_ptr <tny_word> p_immediate() {
         /* As an immediate, ensure the identifier is a constant. */
         if(pass > 1) {
             if(constants.count(ident->token_str) > 0) {
-                val = shared_ptr <tny_word>(new tny_word(constants[ident->token_str]));
+                val = shared_ptr <tny_word>(new tny_word(constants[ident->token_str].val));
             }
             else if(variables.count(ident->token_str) > 0) {
-                val = shared_ptr <tny_word>(new tny_word(variables[ident->token_str]));
+                val = shared_ptr <tny_word>(new tny_word(variables[ident->token_str].addr));
             }
             else {
-                cerr << "Error, Line(" << ident->line_no << "): ";
+                cerr << "ERROR, line " << ident->line_no << ": ";
                 cerr << "\"" << ident->token_str << "\" is not a constant or identifier" << endl;
                 val = nullptr;
             }
         }
+        else {
+            /* 
+             * First pass still needs to ensure val is valid, since the syntax 
+             * is valid, but the constant or variable may not yet have been
+             * defined.  We'll catch the undefined ones on pass > 1.
+             * 
+             * We'll just sen back a pointer to a zero.
+             */
+            val = shared_ptr <tny_word>(new tny_word{.u = 0x0});
+        }
+    }
+    else if((tnext = save, val = p_raw_value())) {
+        /* nothing to do */
     }
 
     return val;
@@ -475,13 +545,13 @@ shared_ptr <tny_word> p_number() {
         }
         else if(pass > 1) {
             if(constants.count(ident->token_str) > 0) {
-                val = shared_ptr <tny_word>(new tny_word(constants[ident->token_str]));
+                val = shared_ptr <tny_word>(new tny_word(constants[ident->token_str].val));
             }
             else if(variables.count(ident->token_str) > 0) {
-                val = shared_ptr <tny_word>(new tny_word(variables[ident->token_str]));
+                val = shared_ptr <tny_word>(new tny_word(variables[ident->token_str].addr));
             }
             else {
-                cerr << "ERROR, Line " << ident->line_no << ": ";
+                cerr << "ERROR, line " << ident->line_no << ": ";
                 cerr << "Identifier \""  << ident->token_str << "\" is not defined" << endl;
             }
         }
@@ -510,6 +580,42 @@ shared_ptr <token> p_plus_or_minus() {
     (tnext = save, val = term(T_MINUS));
 
     return val;
+}
+
+typedef struct reg_and_immed reg_and_immed;
+
+struct reg_and_immed {
+    tny_uword reg;
+    tny_word immed;
+};
+
+/*
+ * register_and_immedite ::= REGISTER plus_or_minus immediate.
+ * register_and_immedite ::= immediate PLUS REGISTER.
+ */
+shared_ptr <reg_and_immed> p_register_and_immediate() {
+    shared_ptr <reg_and_immed> result = nullptr;
+    shared_ptr <token> reg, sign = nullptr;
+    shared_ptr <tny_word> immed;
+    int save = tnext;
+    if(
+        (tnext = save, 
+         (reg = term(T_REGISTER)) && (sign = p_plus_or_minus()) &&
+         (immed = p_immediate()))
+        ||
+        (tnext = save,
+         (immed = p_immediate()) && term(T_PLUS) && (reg = term(T_REGISTER)))
+    ) {
+        // OK... what do I do???
+        result = make_shared<reg_and_immed>();
+        result->immed = *immed;
+        if(sign && sign->id == T_MINUS) {
+            result->immed.s *= -1;
+        }
+        result->reg = reg->value.u;
+    }
+
+    return result;
 }
 
 bool is_teeny(tny_sword n) {
@@ -560,24 +666,23 @@ bool p_code_1_line() {
 }
 
 /*
- * code_2_line ::= code_2_inst REGISTER COMMA REGISTER plus_or_minus immediate.
- * code_2_line ::= code_2_mem_inst REGISTER COMMA LBRACKET REGISTER plus_or_minus immediate RBRACKET.
+ * code_2_line ::= code_2_inst REGISTER COMMA register_and_immediate.
+ * code_2_line ::= code_2_mem_inst REGISTER COMMA LBRACKET register_and_immediate RBRACKET.
  */
 bool p_code_2_line() {
     bool result = false;
-    shared_ptr <token> dreg, oper, sreg, sign;
-    shared_ptr <tny_word> immed;
+    shared_ptr <token> dreg, oper;
+    shared_ptr <reg_and_immed>reg_immed = nullptr;
     int save = tnext;
     if(
         (tnext = save,
          (oper = p_code_2_inst()) && (dreg = term(T_REGISTER)) && term(T_COMMA) &&
-         (sreg = term(T_REGISTER)) && (sign = p_plus_or_minus()) &&
-         (immed = p_immediate()) && term(T_EOL))
+         (reg_immed = p_register_and_immediate()) && term(T_EOL))
          ||
          (tnext = save,
           (oper = p_code_2_mem_inst()) && (dreg = term(T_REGISTER)) && term(T_COMMA) &&
-          term(T_LBRACKET) && (sreg = term(T_REGISTER)) && (sign = p_plus_or_minus()) &&
-          (immed = p_immediate()) && term(T_RBRACKET) && term(T_EOL))
+          term(T_LBRACKET) && (reg_immed = p_register_and_immediate()) && 
+          term(T_RBRACKET) && term(T_EOL))
     ) {
 
         instruction inst;
@@ -587,10 +692,10 @@ bool p_code_2_line() {
         f.instruction.opcode = token_to_opcode(oper->id);
         f.instruction.teeny = 0;
         f.instruction.reg1 = dreg->value.u;
-        f.instruction.reg2 = sreg->value.u;
+        f.instruction.reg2 = reg_immed->reg;
         f.instruction.immed4 = 0;
 
-        inst.second.s = immed->s * (sign->id == T_PLUS ? +1 : -1);
+        inst.second.s = reg_immed->immed.s;
 
         bool make_teeny = is_teeny(inst.second.s);
         if(make_teeny) {
@@ -741,15 +846,16 @@ bool p_code_5_line() {
 }
 
 /*
- * code_6_line ::= code_6_inst LBRACKET REGISTER plus_or_minus immediate RBRACKET COMMA REGISTER.
+ * code_6_line ::= code_6_inst LBRACKET register_and_immediate RBRACKET COMMA REGISTER.
  */
 bool p_code_6_line() {
     bool result = false;
-    shared_ptr <token> dreg, oper, sreg, sign;
-    shared_ptr <tny_word> immed;
-    if((oper = p_code_6_inst()) && term(T_LBRACKET) && (dreg = term(T_REGISTER)) &&
-       (sign = p_plus_or_minus()) && (immed = p_immediate()) && term(T_RBRACKET) &&
-       term(T_COMMA) && (sreg = term(T_REGISTER)) && term(T_EOL)) {
+    shared_ptr <token> oper, sreg;
+    shared_ptr <reg_and_immed>reg_immed;
+    if((oper = p_code_6_inst()) && term(T_LBRACKET) &&
+       (reg_immed = p_register_and_immediate()) && term(T_RBRACKET) &&
+       term(T_COMMA) && (sreg = term(T_REGISTER)) && term(T_EOL)
+    ) {
 
         instruction inst;
         inst.line_no = oper->line_no;
@@ -757,11 +863,11 @@ bool p_code_6_line() {
         tny_word &f = inst.first;
         f.instruction.opcode = token_to_opcode(oper->id);
         f.instruction.teeny = 0;
-        f.instruction.reg1 = dreg->value.u;
+        f.instruction.reg1 = reg_immed->reg;
         f.instruction.reg2 = sreg->value.u;
         f.instruction.immed4 = 0;
 
-        inst.second.s = immed->s * (sign->id == T_PLUS ? +1 : -1);
+        inst.second.s = reg_immed->immed.s;
 
         bool make_teeny = is_teeny(inst.second.s);
         if(make_teeny) {
@@ -895,14 +1001,13 @@ bool p_code_9_line() {
 }
 
 /*
- * code_10_line ::= code_10_inst REGISTER plus_or_minus immediate.
+ * code_10_line ::= code_10_inst register_and_immediate.
  */
 bool p_code_10_line() {
     bool result = false;
-    shared_ptr <token> oper, sreg, sign;
-    shared_ptr <tny_word> immed;
-    if((oper = p_code_10_inst()) && (sreg = term(T_REGISTER)) && (sign = p_plus_or_minus())
-        && (immed = p_immediate()) && term(T_EOL)) {
+    shared_ptr <token> oper;
+    shared_ptr <reg_and_immed>reg_immed;
+    if((oper = p_code_10_inst()) && (reg_immed = p_register_and_immediate()) && term(T_EOL)) {
 
         instruction inst;
         inst.line_no = oper->line_no;
@@ -911,10 +1016,10 @@ bool p_code_10_line() {
         f.instruction.opcode = token_to_opcode(oper->id);
         f.instruction.teeny = 0;
         f.instruction.reg1 = 0;
-        f.instruction.reg2 = sreg->value.u;
+        f.instruction.reg2 = reg_immed->reg;
         f.instruction.immed4 = 0;
 
-        inst.second.s = immed->s * (sign->id == T_PLUS ? +1 : -1);
+        inst.second.s = reg_immed->immed.s;
 
         bool make_teeny = is_teeny(inst.second.s);
         if(make_teeny) {
@@ -1055,14 +1160,13 @@ bool p_code_13_line() {
 }
 
 /*
- * code_14_line ::= code_14_inst REGISTER plus_or_minus immediate.
+ * code_14_line ::= code_14_inst register_and_immediate.
  */
 bool p_code_14_line() {
     bool result = false;
-    shared_ptr <token> oper, sreg, sign;
-    shared_ptr <tny_word> immed;
-    if((oper = p_code_14_inst()) && (sreg = term(T_REGISTER)) &&
-       (sign = p_plus_or_minus()) && (immed = p_immediate()) && term(T_EOL)) {
+    shared_ptr <token> oper;
+    shared_ptr <reg_and_immed>reg_immed;
+    if((oper = p_code_14_inst()) && (reg_immed = p_register_and_immediate()) && term(T_EOL)) {
 
         instruction inst;
         inst.line_no = oper->line_no;
@@ -1070,7 +1174,7 @@ bool p_code_14_line() {
         tny_word &f = inst.first;
         f.instruction.opcode = token_to_opcode(oper->id);
         f.instruction.teeny = 0;
-        f.instruction.reg1 = sreg->value.u;
+        f.instruction.reg1 = reg_immed->reg;
         f.instruction.reg2 = 0;
 
         f.instruction.immed4 = 0;
@@ -1087,7 +1191,7 @@ bool p_code_14_line() {
             f.inst_flags.carry = 1;
         }
 
-        inst.second.s = immed->s * (sign->id == T_PLUS ? +1 : -1);
+        inst.second.s = reg_immed->immed.s;
 
         address += 2;
 
@@ -1194,7 +1298,7 @@ tny_uword token_to_opcode(int id) {
     case T_INV:   result = TNY_OPCODE_XOR;   break;
     case T_RET:   result = TNY_OPCODE_POP;   break;
     default:
-        cerr << "Error, line(" << parse_line[0].line_no << "): ";
+        cerr << "ERROR, line " << parse_line[0].line_no << ": ";
         cerr << "token_to_opcode() has unknown id, " << id << endl;
         /*
          * TODO: We should cleanly terminiate the assembler here
@@ -1355,7 +1459,6 @@ shared_ptr <token> p_code_3_inst() {
     (tnext = save, result = term(T_ROL)) ||
     (tnext = save, result = term(T_ROR)) ||
     (tnext = save, result = term(T_SET)) ||
-    (tnext = save, result = term(T_LOD)) ||
     (tnext = save, result = term(T_BTS)) ||
     (tnext = save, result = term(T_BTC)) ||
     (tnext = save, result = term(T_BTF)) ||

@@ -12,6 +12,7 @@
 #include "token.h"
 #include "parser.h"
 #include "listing.h"
+#include "warnings.h"
 
 /*
  * Uncomment the definition below to trace the lexer
@@ -98,11 +99,11 @@ int main(int argc, char *argv[]) {
 		ofstream bin_file(bin_filename, ios::binary);
 		bin_file.write(reinterpret_cast<const char*>(bin_words.data()), bin_words.size() * sizeof(tny_word));
 		generate_listing();
+		print_warnings();
     }
     else {
         cerr << "There were errors.  No binary output." << endl;
     }
-
 
 	return EXIT_SUCCESS;
 }
@@ -135,6 +136,7 @@ void initialize_lexical_regex(vector <token_regex> &patterns) {
 	patterns.push_back(regex_token("![^ \\[\\]\\t\\b\\v\\r\\n;]+", T_LABEL, nullptr));
 	patterns.push_back(regex_token("\\.const(ant)?", T_CONSTANT, nullptr));
 	patterns.push_back(regex_token("\\.var(iable)?", T_VARIABLE, nullptr));
+	patterns.push_back(regex_token("\\.raw", T_RAW, nullptr));
 	patterns.push_back(regex_token("(pc)|(sp)|(rz)", T_REGISTER, handle_register));
 	patterns.push_back(regex_token("r[a-e0-7]", T_REGISTER, handle_register));
 	patterns.push_back(regex_token("set", T_SET, nullptr));

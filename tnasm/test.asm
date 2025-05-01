@@ -6,6 +6,7 @@
 ; Don't change any of the lines in this boxed section. They are crafted to
 ; demonstrate multipass label resolution is working
 .variable amos 0x74A3 ;1
+.var leroy
 .variable aero 0xBeeF ;1
 
 !main
@@ -32,13 +33,18 @@
     psh r3              ;1
     jGE !main
     psh r3 + 14         ;2
-    str [r4 + 3], r3      ;1
+    str [r4-3], r3      ;1
+    str [-3  + r4], r3      ;1
 
-    123 -15 thirty_one 0x12F_F 0b_110_00000_1011_00_10 ;5
+.raw 123 -15 thirty_one 0x12F_F 0b_110_00000_1011_00_10 ;5
 
     mpy r2, !more           ;2
     SHF rD, r2 - !middle    ;2
     lod r3, [rD]
+    lod rA, [SP - 19]
+    lod rA, [-19 + SP]
+    lod PC, [!top_of_loop + rC]
+    lod PC, [rC + !top_of_loop]
 !more
     BTF r1, r3 + thirty_one ;2
     BtS r3, 5
@@ -47,12 +53,17 @@
     rOt rB, !early ;2
 
     JMP PC - 4
+    JMP -4 + PC
     STR [aero], r6
     DLy r3 + 5
     DLy r5
     DLy 31
-    lod r4, 'a'
-    lod r4, '\n'
+    lod r4, ['a']
+    lod r4, ['\n']
+
+    psh r5 + thirty_one
+    psh thirty_one + r5
+
 
     ; here's an example do..loop using LUP
     SET rC, 17
@@ -67,7 +78,7 @@
     CAL rB + 0xF7
 
     lod r5, [r1 - amos]
-    lod PC, aero
+    lod PC, [aero]
 
     RoL rB, 3
     ror rA, 2
@@ -86,11 +97,11 @@
 ; and that's all
 
 !my_string
-    "Leroy"  ; a null terminated string
+.raw "Leroy"  ; a null terminated string
 
 ; packed strings have two characters per 16 bit word.  Here are 
 ; two examples one byte apart in length.
 !a_packed_string  
-    'Aero jumps at midnight'
+.raw 'Aero jumps at midnight'
 !another_packed_string
-    'Leroy jumps at midnight'
+.raw 'Leroy jumps at midnight'
