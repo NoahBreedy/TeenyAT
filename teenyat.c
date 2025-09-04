@@ -9,6 +9,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <signal.h>
 #include <string.h>
 #include <time.h>
 
@@ -95,6 +96,42 @@ static void default_bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_
 	return;
 }
 
+/*------- Pretty gross ----------------- */
+teenyat* tny_debugger_ctx = NULL;
+
+void default_debugger_callback2(int sig) {
+  tny_debugger_ctx->debug_mode = false;
+}
+
+void default_debugger_callback(int sig) {
+  tny_debugger_ctx->debug_mode = true;
+  tny_debugger_ctx->signal_clock = true;
+  tny_clock(tny_debugger_ctx);
+  tny_debugger_ctx->signal_clock = false;
+  printf("------------TEENY_BUG-----------------\n");
+  printf("Cycle-Count: %ld\n\n", tny_debugger_ctx->cycle_cnt);
+
+  printf("Registers:\n");
+  printf("rA: %d\n", tny_debugger_ctx->reg[TNY_REG_A].s);
+  printf("rB: %d\n", tny_debugger_ctx->reg[TNY_REG_B].s);
+  printf("rC: %d\n", tny_debugger_ctx->reg[TNY_REG_C].s);
+  printf("rD: %d\n", tny_debugger_ctx->reg[TNY_REG_D].s);
+  printf("rE: %d\n", tny_debugger_ctx->reg[TNY_REG_E].s);
+  printf("PC: %d\n", tny_debugger_ctx->reg[TNY_REG_PC].u);
+  printf("SP: %d\n", tny_debugger_ctx->reg[TNY_REG_SP].u);
+  printf("--------------------------------------\n");
+}
+
+void tny_enable_debugging(teenyat *t, void (*callback1)(int), void(*callback2)(int)) {
+  printf("TeenyID is: %d\n", getpid());
+  tny_debugger_ctx = t;
+  void (*c1)(int) = callback1 ? callback1 : default_debugger_callback;
+  void (*c2)(int) = callback2 ? callback2 : default_debugger_callback2;
+  signal(SIGUSR1, c1);
+  signal(SIGUSR2, c2);
+}
+/* ------------------------------------ */
+
 bool tny_init_from_file(teenyat *t, FILE *bin_file,
                         TNY_READ_FROM_BUS_FNPTR bus_read,
                         TNY_WRITE_TO_BUS_FNPTR bus_write) {
@@ -114,10 +151,12 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
 	t->bus_write = bus_write ? bus_write : default_bus_write;
     
 	t->clock_manager.initial_pace_cnt = TNY_DEFAULT_PACE_CNT;
-    t->clock_manager.clock_wait_time = tny_calibrate_1_MHZ();
-    t->clock_manager.pace_divisor = 1;
+  t->clock_manager.clock_wait_time = tny_calibrate_1_MHZ();
+  t->clock_manager.pace_divisor = 1;
  
 	if(!tny_reset(t)) return false;
+
+  t->debug_mode  = false;
 
 	t->initialized = true;
 
@@ -291,7 +330,12 @@ void tny_set_ports(teenyat *t, tny_word *a, tny_word *b) {
 }
 
 void tny_clock(teenyat *t) {
-	 
+
+  /* If a debug instance make sure we're signaling the clock */
+  if(t->debug_mode && !t->signal_clock) {
+      return;
+  }
+
 	/* Get initial time of our clock cycles 
      *  and initialize our first pace start 
     */

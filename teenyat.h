@@ -270,6 +270,9 @@ struct teenyat {
 		/* The initial pace count to start at effects how often we update */
 		int16_t initial_pace_cnt;
 	} clock_manager;
+  
+  bool debug_mode;
+  bool signal_clock;
 	/**
 	 * The number of cycles this instance has been running since initialization
 	 * or reset.
@@ -281,6 +284,8 @@ struct teenyat {
 	 */
 	void *ex_data;
 };
+
+extern teenyat* tny_debugger_ctx;
 
 #define TNY_OPCODE_SET 0
 #define TNY_OPCODE_LOD 1
@@ -406,6 +411,8 @@ bool tny_init_from_file(teenyat *t, FILE *bin_file,
 bool tny_init_unclocked(teenyat *t, FILE *bin_file,
 						TNY_READ_FROM_BUS_FNPTR bus_read,
 						TNY_WRITE_TO_BUS_FNPTR bus_write);
+
+void tny_enable_debugging(teenyat *t, void (*callback1)(int), void(*callback2)(int));
 
 /**
 * @brief
