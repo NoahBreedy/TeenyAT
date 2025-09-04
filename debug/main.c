@@ -15,7 +15,10 @@ int main(int argc, char* argv[]) {
     pid_t pid = atoi(argv[1]);
 
     printf("TeenyBug connected @%d",pid);
-
+/*    for(int i = 0; i < 20; i++) {
+      kill(pid, SIGUSR1);
+      usleep(50000);
+    } */
     while(1) {
 
         printf("\nPress enter to step: ");
@@ -30,7 +33,7 @@ int main(int argc, char* argv[]) {
           kill(pid, SIGUSR2);
         }
 
-        usleep(500000);  // change for Windows port (or maybe use wine....)
+        usleep(50000);  // change for Windows port (or maybe use wine....)
     }
 
     return 0;
