@@ -5,6 +5,7 @@
 #include "screen.h"
 #include "teenyat.h"
 #include "util.h"
+#include "../debug/custom_system.h"
 
 /*
  *  These are the start of the address ranges or the addresses themselves: 
@@ -158,6 +159,7 @@ int main(int argc, char *argv[])
     FILE *bin_file = fopen(fileName.c_str(), "rb");
     if(bin_file != NULL) {
         tny_init_from_file(&t, bin_file, bus_read, bus_write);
+        tny_enable_debugging(&t, custom_signal_1, custom_signal_2);
         fclose(bin_file);
     }else {
         std::cout << "Failed to init bin file (invalid path?)" << std::endl;
@@ -169,7 +171,9 @@ int main(int argc, char *argv[])
             tigrUpdate(window);
             current_frame = 0;
         }
+
         tny_clock(&t);
+
         current_frame++;
     }
 
