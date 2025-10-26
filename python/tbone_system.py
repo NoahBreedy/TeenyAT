@@ -2,41 +2,37 @@
 """
 tbone: run a TeenyAT program from Python using CFFI bindings.
 """
+from teenyat import *
 
-from _teenyat_cffi import ffi, lib
-import sys
-
-@ffi.callback("void(teenyat*, tny_uword, tny_word*, uint16_t*)")
+@tny_bus_read
 def bus_read(t, addr, data, delay):
     print(f"LOAD from : {addr}")
+    data.u = 67
     return
 
 # There are problems with the union...
 # cffi dosnt like to pass in the full tny_word union so we have to treat it like a pointer...
-@ffi.callback("void(teenyat*, tny_uword, tny_word*, uint16_t*)")
-def bus_write(t, addr, data, delay):
-    pass
+#@ffi.callback("void(teenyat*, tny_uword, tny_word*, uint16_t*)")
+#def bus_write(t, addr, data, delay):
+#    pass
 
 if __name__ == "__main__":
 
-    t = ffi.new("teenyat*")
+    t = TeenyAT()
 
-    # This is the nonsense we need to do to open a file pointer
-    libc = ffi.dlopen(None)         # note we can only do this by including the the FILE* and fopens functions into our program
-    # This could probably be mitigated if we had the c program open the file for ous instead of doing it system side...
-    bin_file = libc.fopen(b"hello.bin", b"rb")
-    if(bin_file == ffi.NULL):
+    bin_file = tny_file_open("hello.bin")
+    if(bin_file == None):
         print("Failed to open binary file")
         sys.exit(1)
 
-    # cant get bus write callbacks to build
-    lib.tny_init_unclocked(t, bin_file, bus_read, ffi.NULL)
-
-    libc.fclose(bin_file)
+    tny_init_unclocked(t, bin_file, bus_read)
+    tny_file_close(bin_file)
 
     for i in range(77):
-        lib.tny_clock(t)
+        tny_clock(t)
 
     # it actually works tho lol
-    print(f"Final cycle count: {t.cycle_cnt}")
+    print(f"\n\nFinal cycle count: {t.cycle_cnt}")
+    print(f"PC: {t.reg[1].u}")
+    print(f"rA: {t.reg[3].u}")
 
