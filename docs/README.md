@@ -71,3 +71,23 @@ Each instruction follows a standard format:
 | [`JLE`](./instructions/jle.md)   | Set program counter if cmp was less than or equal| `jle !when`  |
 | [`JG`](./instructions/jg.md)   | Set program counter if cmp was greater than  | `jg !who`  |
 | [`JGE`](./instructions/jge.md)   | Set program counter if cmp was greater than or equal | `jge !what` |
+
+---
+
+## 🗺️ TeenyAT Internal Memory-Mapped I/O (MMIO)
+
+On-board peripherals occupy memory in the `0x8000–0x8FFF` address range.
+
+| Symbol | Address | Description | Access |
+|--------|----------|-------------|--------|
+| `PORT_A_DIR` | `0x8000` | Port A direction register (0 = output, 1 = input) | Read/Write |
+| `PORT_B_DIR` | `0x8001` | Port B direction register | Read/Write |
+| `PORT_A` | `0x8002` | Port A data register | Read/Write |
+| `PORT_B` | `0x8003` | Port B data register | Read/Write |
+| `RAND` | `0x8010` | Pseudo-random **positive** number generator | Read |
+| `RAND_BITS` | `0x8011` | Pseudo-random bit pattern generator | Read |
+| `INTERRUPT_VECTOR_TABLE` | `0x8E00 -> 0x8E0F` | Vector addresses for interrupt service routines | Read/Write |
+| `INTERRUPT_ENABLE_REGISTER` | `0x8E10` | Bitmask of enabled interrupts | Read/Write |
+| `CONTROL_STATUS_REGISTER` | `0x8EFF` | Global system control<br>bit0=interrupt enable, bit1=clear interrupt | Read/Write |
+
+> ⚠️ **Note:** These are just our conventional symbol names — you can redefine them freely in **[tnasm](../tnasm/README.md)**, e.g. `.const MY_PORT 0x8002`
