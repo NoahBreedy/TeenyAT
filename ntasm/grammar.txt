@@ -1,0 +1,18 @@
+<program> ::= <line>*
+
+<line>    ::= <pp_directive>
+            | <statement>
+            | <new_line>
+
+<pp_directive> ::= "@" IDENTIFIER <pp_args>? <new_line>
+
+<pp_args>  ::= <pp_arg>
+             | <pp_arg> <pp_args>
+
+<pp_arg>   ::= STRING
+             | IDENTIFIER
+             | NUMBER
+
+<new_line> ::= NEW_LINE
+             | NEW_LINE <new_line>
+             | EOF
