@@ -1,18 +1,34 @@
-<program> ::= <line>*
+;--------
+;  It may not be proper for me to have the preproccessor grammar here
+;  since our bottom level parser dosent actually recieve these tokens
+;--------
+
+<program> ::= <line>* <eof>
 
 <line>    ::= <pp_directive>
             | <statement>
-            | <new_line>
+            | <eol>
 
-<pp_directive> ::= "@" IDENTIFIER <pp_args>? <new_line>
+<pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> <pp_args>? <eol>
 
-<pp_args>  ::= <pp_arg>
-             | <pp_arg> <pp_args>
+<pp_args>  ::= <pp_arg> <pp_args>
+             | <pp_arg>
 
-<pp_arg>   ::= STRING
-             | IDENTIFIER
-             | NUMBER
+<pp_arg>   ::= T_STRING
+             | T_NUMBER
+             | T_IDENTIFIER
 
-<new_line> ::= NEW_LINE
-             | NEW_LINE <new_line>
-             | EOF
+;--------
+; I dont pass these in as tokens since its simpler
+; to handle this as terminal strings
+;--------
+<pp_identifier> ::= "ifdef"
+                  | "ifndef"
+                  | "endif"
+                  | "define"
+                  | "undefine"
+                  | "include"
+
+<eol> ::= T_EOL
+<eof> ::= T_EOL
+
