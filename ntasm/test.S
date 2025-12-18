@@ -2,6 +2,8 @@
 @define MY_MACRO
 
 !test_label
-    set rZ, rA
+    set Ra, 0
+    set rA, rB
+    set rA, rB + 10
 
 @endif
