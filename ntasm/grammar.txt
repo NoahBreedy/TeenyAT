@@ -3,13 +3,18 @@
 ;  since our bottom level parser dosent actually recieve these tokens
 ;--------
 
-<program> ::= <line>* <eof>
+<program> ::= <line>* T_EOL
 
 <line>    ::= <pp_directive>
             | <statement>
-            | <eol>
+            | T_EOL
 
-<pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> <pp_args>? <eol>
+<statement> ::= <statement_body> T_EOL
+
+<statement_body> ::= <label_line>
+                   | <code_line>
+
+<pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> <pp_args>? T_EOL
 
 <pp_args>  ::= <pp_arg> <pp_args>
              | <pp_arg>
@@ -29,6 +34,33 @@
                   | "undefine"
                   | "include"
 
-<eol> ::= T_EOL
-<eof> ::= T_EOL
+<label_line> ::= T_LABEL
 
+<number> ::= <plus_or_minus> T_NUMBER
+           | T_IDENTIFIER
+           | T_NUMBER
+
+<raw_value> ::=  <number>
+              |  T_CHARACTER
+
+<immediate> ::=  <raw_value>
+              |  T_LABEL
+
+<plus_or_minus> ::= T_PLUS
+                  | T_MINUS
+
+<register_and_immediate> ::= T_REGISTER <includes_immediate>
+                           | <immediate> <includes_register>
+
+;------
+; I put ε isntead of T_EOL since its already satisfied by <statement>
+;------
+<includes_immediate> ::= <plus_or_minus> <immediate>
+                       | ε
+
+<includes_register> ::= T_PLUS T_REGISTER
+                      | ε
+
+<code_line> ::= <set_instruction>
+
+<set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
