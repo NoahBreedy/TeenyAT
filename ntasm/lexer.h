@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <cstring>
 #include "token.h"
 
 class Lexer {
