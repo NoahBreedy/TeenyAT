@@ -7,7 +7,7 @@
 
 class Parser {
 public:
-    explicit Parser(Preprocessor& pp);
+    explicit Parser(Preprocessor& pp, bool debug);
 
     bool parse_program();
 
@@ -15,11 +15,12 @@ private:
     Preprocessor& pp;
     token current;
 
+    bool debug_mode;
     bool valid_program;
 
     tny_word bin_word_0;
     tny_word bin_word_1;
-    
+
     /* Im making these teeny_words because I don't want the overload */
     tny_word p_opcode;
     bool     p_teeny;
@@ -27,6 +28,8 @@ private:
     tny_word p_reg2;
     tny_word p_immed;
     tny_word p_negative;
+
+    void trace_parser(bool print_new_line);
 
     void advance();
     bool match(token_type t);

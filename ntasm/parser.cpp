@@ -4,15 +4,18 @@
 #include "parser.h"
 #include "errorlog.h"
 
-Parser::Parser(Preprocessor& p)
-    : pp(p), current(T_EOL, "", 0){
-    /* we advance here because we don't want our first token to be an T_EOL */
+Parser::Parser(Preprocessor& p, bool debug)
+    : pp(p), current(T_EOL, "", 0) {
+
+    debug_mode  = debug;
     valid_program = true;
     p_opcode.u = 0;
     p_reg1.u = 0;
     p_reg2.u = 0;
     p_immed.s = 0;
     p_negative.u = 0;
+
+    /* we advance here because we don't want our first token to be an T_EOL */
     advance();
 }
 
@@ -20,8 +23,21 @@ void Parser::advance() {
     current = pp.next_token();
 }
 
+void Parser::trace_parser(bool print_new_line) {
+    if(debug_mode) {
+        if(print_new_line) {
+            std::cout << '\n';
+        }else {
+            std::string s = current.token_str;
+            if(s == "\n") s = "\\n";
+            std::cout << tstr[current.type] << "( " << s << " ) ";
+        }
+    }
+}
+
 bool Parser::match(token_type t) {
     if (current.type == t) {
+        trace_parser(false);
         advance();
         return true;
     }
@@ -30,6 +46,7 @@ bool Parser::match(token_type t) {
 
 bool Parser::match(token_type t, tny_word* dest) {
     if (current.type == t) {
+        trace_parser(false);
         set_destination(current, dest);
         advance();
         return true;
@@ -39,6 +56,7 @@ bool Parser::match(token_type t, tny_word* dest) {
 
 void Parser::expect(token_type t, const std::string& msg) {
     if (!match(t)) {
+        trace_parser(false);
         valid_program = log_error(current, msg);
     }
 }
@@ -51,7 +69,7 @@ tny_word Parser::token_to_opcode(token_type t) {
 }
 
 void Parser::set_destination(token token, tny_word* dest) {
-    char* c; 
+    char* c;
     switch(token.type) {
         case T_REGISTER:    *dest = register_to_value(token.token_str); break;
         case T_PLUS:        *dest = tny_word{u: 0}; break;
@@ -89,10 +107,9 @@ tny_word Parser::process_number(std::string s) {
             result.s += (std::strchr(table, std::tolower(c)) - table) / sizeof(char);
         }
     }
-    
+
     /* negate the value if its supposed to be negative */
     if(p_negative.u) {
-        std::cout << result.s << std::endl;
         result.s *= -1;
     }
 
@@ -101,9 +118,9 @@ tny_word Parser::process_number(std::string s) {
 
 tny_word Parser::register_to_value(std::string s) {
     for (char& c : s) {
-        c = std::tolower(c);     
+        c = std::tolower(c);
     }
-    
+
     tny_word register_value;
     if (s == "pc") {
         register_value.u = TNY_REG_PC;
@@ -123,6 +140,7 @@ tny_word Parser::register_to_value(std::string s) {
 bool Parser::parse_program() {
     while (current.type != T_EOL || !current.token_str.empty()) {
         parse_line();
+        trace_parser(true);
     }
     return (valid_program && pp.valid_program);
 }
@@ -147,19 +165,19 @@ void Parser::parse_statement() {
         valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
     }
 
-    expect(T_EOL, ltrim(line) + "\tmissing end of line character!"); 
+    expect(T_EOL, ltrim(line) + "\tmissing end of line character!");
 }
 
 bool Parser::parse_label_line() {
    if(!match(T_LABEL)) {
-        return false; 
+        return false;
    }
    /* handle label nonsense like adding it to some dictionary and the current address */
    return true;
 }
 
 bool Parser::parse_code_line() {
-    bool matched_code_line = parse_set_instruction();    
+    bool matched_code_line = parse_set_instruction();
     return matched_code_line;
 }
 
@@ -193,10 +211,10 @@ bool Parser::parse_immediate(tny_word* immed) {
 }
 
 bool Parser::parse_includes_immediate(tny_word* immed) {
-    if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) { 
+    if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
        return parse_immediate(immed);
     }
-     
+
     return immed->u = 0, current.type == T_EOL;
 }
 
@@ -210,13 +228,13 @@ bool Parser::parse_includes_register(tny_word* reg) {
 bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 
    if(match(T_REGISTER, reg)) {
-        return parse_includes_immediate(immed);     
+        return parse_includes_immediate(immed);
    }
 
    if(parse_immediate(immed)) {
         return parse_includes_register(reg);
    }
- 
+
    return false;
 }
 
@@ -224,7 +242,7 @@ bool Parser::parse_set_instruction() {
     if(match(T_SET, &p_opcode) && match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
         bool valid_inst = parse_register_and_immediate(&p_reg2, &p_immed);
         if(valid_inst) {
-            std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
+           std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
         }
         return valid_inst;
     }

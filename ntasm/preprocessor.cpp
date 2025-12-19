@@ -130,7 +130,7 @@ void Preprocessor::handle_include() {
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
-    
+
     lexers.push(new Lexer(contents, filename));
 }
 
