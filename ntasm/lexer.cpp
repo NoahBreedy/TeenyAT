@@ -49,8 +49,17 @@ void Lexer::init_rules() {
     rules.push_back({ std::regex("^set\\b", std::regex_constants::icase), T_SET });
     rules.push_back({ std::regex("^add\\b", std::regex_constants::icase), T_ADD });
 
+    // Hexadecimal number
+    rules.push_back({ std::regex("^0x(_*[0-9a-f]+)+", std::regex_constants::icase), T_NUMBER });
+    
+    // Binary Number
+    rules.push_back({ std::regex("^0b(_*[0-1]+)+"), T_NUMBER });
+
+    // Octal Number
+    rules.push_back({ std::regex("^0o(_*[0-7]+)+"), T_NUMBER });
+
     // Decimal Numbers
-    rules.push_back({ std::regex("^[0-9]+"), T_NUMBER });
+    rules.push_back({ std::regex("^[0-9]+(_*[0-9]+)*"), T_NUMBER });
 
     // Number Prefixes
     rules.push_back({ std::regex("^\\+"), T_PLUS });
