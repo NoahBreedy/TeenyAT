@@ -34,7 +34,7 @@ private:
     void advance();
     bool match(token_type t);
     bool match(token_type t, tny_word* dest);
-    void expect(token_type t, const std::string& msg);
+    void expect(token_type t);
 
     void set_destination(token token, tny_word* dest);
     tny_word register_to_value(std::string s);
@@ -42,7 +42,7 @@ private:
     tny_word process_number(std::string s);
 
     void parse_line();
-    void parse_statement();
+    bool parse_statement();
     bool parse_label_line();
     bool parse_code_line();
 

@@ -54,10 +54,12 @@ bool Parser::match(token_type t, tny_word* dest) {
     return false;
 }
 
-void Parser::expect(token_type t, const std::string& msg) {
+void Parser::expect(token_type t) {
     if (!match(t)) {
         trace_parser(false);
-        valid_program = log_error(current, msg);
+        valid_program = false;
+        /* we advance here since if we don't well end up in a looooop (canceled the early exit)*/
+        advance();
     }
 }
 
@@ -150,22 +152,21 @@ void Parser::parse_line() {
         return;
     }
 
-    parse_statement();
+    bool matched = parse_statement();
+    
+    expect(T_EOL);
 
-    if (current.type == T_EOL)
-        advance();
+    if(!matched) {
+        std::string line = token_line_str(pp,current);
+        valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
+    }
 }
 
-void Parser::parse_statement() {
+bool Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
                              parse_code_line();
 
-    std::string line = token_line_str(pp,current);
-    if(!matched_statement) {
-        valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
-    }
-
-    expect(T_EOL, ltrim(line) + "\tmissing end of line character!");
+    return matched_statement;
 }
 
 bool Parser::parse_label_line() {
