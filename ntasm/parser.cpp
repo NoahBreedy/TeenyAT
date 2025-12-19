@@ -7,6 +7,7 @@
 Parser::Parser(Preprocessor& p)
     : pp(p), current(T_EOL, "", 0){
     /* we advance here because we don't want our first token to be an T_EOL */
+    valid_program = true;
     p_opcode.u = 0;
     p_reg1.u = 0;
     p_reg2.u = 0;
@@ -38,15 +39,14 @@ bool Parser::match(token_type t, tny_word* dest) {
 
 void Parser::expect(token_type t, const std::string& msg) {
     if (!match(t)) {
-        log_error(current, msg);
-        std::exit(EXIT_FAILURE);
+        valid_program = log_error(current, msg);
     }
 }
 
 tny_word Parser::token_to_opcode(token_type t) {
     switch(t) {
         case T_SET: return tny_word{u: TNY_OPCODE_SET};
-        default: std::cerr << "unknon opcode" << std::endl; std::exit(EXIT_FAILURE);
+        default: std::cerr << "Fatal error unkownn opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
 
@@ -120,10 +120,11 @@ tny_word Parser::register_to_value(std::string s) {
     return register_value;
 }
 
-void Parser::parse_program() {
+bool Parser::parse_program() {
     while (current.type != T_EOL || !current.token_str.empty()) {
         parse_line();
     }
+    return (valid_program && pp.valid_program);
 }
 
 void Parser::parse_line() {
@@ -141,13 +142,12 @@ void Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
                              parse_code_line();
 
+    std::string line = token_line_str(pp,current);
     if(!matched_statement) {
-        std::string line = token_line_str(pp,current);
-        log_error(current, ltrim(line) + "\tinvalid syntax!");
-        std::exit(EXIT_FAILURE);
+        valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
     }
 
-    expect(T_EOL, "missing end of line character!"); 
+    expect(T_EOL, ltrim(line) + "\tmissing end of line character!"); 
 }
 
 bool Parser::parse_label_line() {

@@ -9,11 +9,13 @@ class Parser {
 public:
     explicit Parser(Preprocessor& pp);
 
-    void parse_program();
+    bool parse_program();
 
 private:
     Preprocessor& pp;
     token current;
+
+    bool valid_program;
 
     tny_word bin_word_0;
     tny_word bin_word_1;
