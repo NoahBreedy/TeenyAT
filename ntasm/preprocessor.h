@@ -13,6 +13,7 @@ public:
     explicit Preprocessor(Lexer* root);
 
     token next_token();
+    Lexer& current_lexer();
 
 private:
 
@@ -33,7 +34,6 @@ private:
 
     std::stack<cond_state> cond_stack;
 
-    Lexer& current_lexer();
     bool is_active();
 
     void handle_directive(const token& directive);
