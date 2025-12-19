@@ -56,13 +56,47 @@ void Parser::set_destination(token token, tny_word* dest) {
         case T_REGISTER:    *dest = register_to_value(token.token_str); break;
         case T_PLUS:        *dest = tny_word{u: 0}; break;
         case T_MINUS:       *dest = tny_word{u: 1}; break;
-        case T_NUMBER:      *dest = tny_word{s: (short int) strtol(token.token_str.c_str(), &c, 10)}; break;
-        case T_LABEL:       *dest = tny_word{u: 1}; break;
-        case T_IDENTIFIER:  *dest = tny_word{u: 1}; break;
+        case T_NUMBER:      *dest = process_number(token.token_str); break;
+        case T_LABEL:       *dest = tny_word{u: 67}; break;
+        case T_IDENTIFIER:  *dest = tny_word{u: 69}; break;
         /* this means its an opcode */
         default: *dest = token_to_opcode(token.type); break;
    }
    return;
+}
+
+tny_word Parser::process_number(std::string s) {
+    const char table[] = "0123456789abcdef";
+    tny_word result;
+    result.u = 0;
+
+    int base = 10;
+
+    if(s.size() > 2) {
+        switch(s[1]) {
+                case 'b': base = 2;  break;
+                case 'o': base = 8; break;
+                case 'x': base = 16; break;
+                default:  base = 10; break;
+        }
+    }
+
+    if(base != 10) s = s.substr(2);
+
+    for(auto c : s) {
+        if(c != '_') {
+            result.s *= base;
+            result.s += (std::strchr(table, std::tolower(c)) - table) / sizeof(char);
+        }
+    }
+    
+    /* negate the value if its supposed to be negative */
+    if(p_negative.u) {
+        std::cout << result.s << std::endl;
+        result.s *= -1;
+    }
+
+    return result;
 }
 
 tny_word Parser::register_to_value(std::string s) {
@@ -98,8 +132,6 @@ void Parser::parse_line() {
     }
 
     parse_statement();
-    
-    std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
 
     if (current.type == T_EOL)
         advance();
@@ -108,6 +140,7 @@ void Parser::parse_line() {
 void Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
                              parse_code_line();
+
     if(!matched_statement) {
         std::string line = token_line_str(pp,current);
         log_error(current, ltrim(line) + "\tinvalid syntax!");
@@ -189,7 +222,11 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 
 bool Parser::parse_set_instruction() {
     if(match(T_SET, &p_opcode) && match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
-        return parse_register_and_immediate(&p_reg2, &p_immed);
+        bool valid_inst = parse_register_and_immediate(&p_reg2, &p_immed);
+        if(valid_inst) {
+            std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
+        }
+        return valid_inst;
     }
     return false;
 }

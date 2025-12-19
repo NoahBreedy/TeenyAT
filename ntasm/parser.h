@@ -34,6 +34,7 @@ private:
     void set_destination(token token, tny_word* dest);
     tny_word register_to_value(std::string s);
     tny_word token_to_opcode(token_type t);
+    tny_word process_number(std::string s);
 
     void parse_line();
     void parse_statement();
