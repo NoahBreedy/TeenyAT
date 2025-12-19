@@ -77,7 +77,7 @@ tny_word Parser::register_to_value(std::string s) {
         register_value.u = TNY_REG_SP;
     } else if (s == "rz") {
         register_value.u = TNY_REG_ZERO;
-    }else if(isdigit(s[1])) {
+    }else if(std::isdigit(s[1])) {
         register_value.u =  (int)(s[1] - '0');
     }else {
         register_value.u = (int)(s[1] - 'a') + TNY_REG_A;
@@ -109,7 +109,8 @@ void Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
                              parse_code_line();
     if(!matched_statement) {
-        log_error(current, "invalid syntax!");
+        std::string line = token_line_str(pp,current);
+        log_error(current, ltrim(line) + "\tinvalid syntax!");
         std::exit(EXIT_FAILURE);
     }
 
