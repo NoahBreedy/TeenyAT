@@ -42,9 +42,12 @@ int main(int argc, char** argv) {
     Preprocessor preprocessor(lexer);
     Parser parser(preprocessor);
 
-    parser.parse_program();
-
-    std::cout << "Parse completed successfully.\n";
+    bool valid_program = parser.parse_program();
+    if(valid_program) {
+        std::cout << "Parse completed successfully.\n";
+    }else {
+        std::cout << "There were errors. No binary output.\n";
+    }
     return 0;
 }
 

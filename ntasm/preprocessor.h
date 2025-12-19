@@ -14,6 +14,7 @@ public:
 
     token next_token();
     Lexer& current_lexer();
+    bool valid_program;
 
 private:
 

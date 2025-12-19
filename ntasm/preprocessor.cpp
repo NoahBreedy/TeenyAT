@@ -5,6 +5,7 @@
 #include "errorlog.h"
 
 Preprocessor::Preprocessor(Lexer* root) {
+    valid_program = true;
     lexers.push(root); // move is pretty cool actually since we know we wont need root to hold the info no mo
 }
 
@@ -56,7 +57,7 @@ void Preprocessor::handle_directive(const token& directive) {
     else if (name == "endif")   handle_endif(directive);
     else if (name == "include") handle_include();
     else {
-        log_error(directive,"unknown directive @" + name);
+        valid_program = log_error(directive,"unknown directive @" + name);
         skip_line();
     }
 }
@@ -65,7 +66,7 @@ void Preprocessor::handle_define() {
     token name = current_lexer().next_token();
 
     if (name.type != T_IDENTIFIER) {
-        log_error(name, "Expected identifier after @define");
+        valid_program = log_error(name, "Expected identifier after @define");
         skip_line();
         return;
     }
@@ -99,7 +100,7 @@ void Preprocessor::handle_ifdef(bool invert) {
 
 void Preprocessor::handle_endif(const token& directive) {
     if (cond_stack.empty()) {
-        log_error(directive, "Unmatched @endif");
+        valid_program = log_error(directive, "Unmatched @endif");
         return;
     }
     cond_stack.pop();
@@ -110,7 +111,7 @@ void Preprocessor::handle_include() {
     token path = current_lexer().next_token();
 
     if (path.type != T_STRING) {
-        log_error(path, "@include requires string literal");
+        valid_program = log_error(path, "@include requires string literal");
         skip_line();
         return;
     }
@@ -119,7 +120,7 @@ void Preprocessor::handle_include() {
 
     std::ifstream file(filename);
     if (!file) {
-        log_error(path, "Could not open include file \"" + filename + "\"");
+        valid_program = log_error(path, "Could not open include file \"" + filename + "\"");
         skip_line();
         return;
     }
