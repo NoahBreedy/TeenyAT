@@ -51,7 +51,7 @@ void Lexer::init_rules() {
 
     // Hexadecimal number
     rules.push_back({ std::regex("^0x(_*[0-9a-f]+)+", std::regex_constants::icase), T_NUMBER });
-    
+
     // Binary Number
     rules.push_back({ std::regex("^0b(_*[0-1]+)+"), T_NUMBER });
 

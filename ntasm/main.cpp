@@ -37,17 +37,19 @@ int main(int argc, char** argv) {
     std::stringstream file_buffer;
     file_buffer << file.rdbuf();
     std::string asm_lines = file_buffer.str();
-    
+
     Lexer* lexer = new Lexer(asm_lines, asm_filename.string());
     Preprocessor preprocessor(lexer);
-    Parser parser(preprocessor);
+    Parser parser(preprocessor, false);
 
     bool valid_program = parser.parse_program();
+
     if(valid_program) {
         std::cout << "Parse completed successfully.\n";
     }else {
         std::cout << "There were errors. No binary output.\n";
     }
+
     return 0;
 }
 
