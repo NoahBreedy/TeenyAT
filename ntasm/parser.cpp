@@ -6,7 +6,9 @@
 
 Parser::Parser(Preprocessor& p, bool debug)
     : pp(p), current(T_EOL, "", 0) {
-
+    
+    address = 0;
+    label_resolutions = 0;
     debug_mode  = debug;
     valid_program = true;
     p_opcode.u = 0;
@@ -14,9 +16,10 @@ Parser::Parser(Preprocessor& p, bool debug)
     p_reg2.u = 0;
     p_immed.s = 0;
     p_negative.u = 0;
-
-    /* we advance here because we don't want our first token to be an T_EOL */
-    advance();
+    p_condition_flags.u = 0;
+}
+void Parser::reset_lexer() {
+    pp.reset(); 
 }
 
 void Parser::advance() {
@@ -33,6 +36,41 @@ void Parser::trace_parser(bool print_new_line) {
             std::cout << tstr[current.type] << "( " << s << " ) ";
         }
     }
+}
+
+/* just see if it fits into 4 bits */
+bool is_teeny(tny_sword n) {
+    tny_word small;
+    small.instruction.immed4 = n;
+    return small.instruction.immed4 == n;
+}
+
+void Parser::push_binary() {
+    /* map our processed values into its associated fields */
+
+    bin_word_0.instruction.opcode =  p_opcode.u;
+    bin_word_0.instruction.teeny  =  0;  
+    bin_word_0.instruction.reg1   =  p_reg1.u;
+    bin_word_0.instruction.reg2   =  p_reg2.u;
+    bin_word_0.instruction.immed4 =  p_condition_flags.u;
+
+    bin_word_1.s = p_immed.s;
+
+    bool teeny = is_teeny(p_immed.s);
+    /* we check if condition flags is zero since and jmp instruction will have all 1s in it */
+    if(teeny && p_condition_flags.u == 0) {
+       bin_word_0.instruction.immed4 = p_immed.s;  
+       bin_word_0.instruction.teeny  = 1;  
+    }
+
+    bin_words.push_back(bin_word_0);
+    address++; 
+
+    if(!teeny) {
+        bin_words.push_back(bin_word_1);
+        address++; 
+    }
+
 }
 
 bool Parser::match(token_type t) {
@@ -142,6 +180,12 @@ tny_word Parser::register_to_value(std::string s) {
 }
 
 bool Parser::parse_program() {
+
+    /* clear all binary words */
+    bin_words.clear();
+    label_resolutions++;
+    /* we auto advance since the default state of the parser is empty T_EOL */
+    advance();
     while (current.type != T_EOL || !current.token_str.empty()) {
         parse_line();
         trace_parser(true);
@@ -250,6 +294,7 @@ bool Parser::parse_set_instruction() {
     if(match(T_SET, &p_opcode) && match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
         bool valid_inst = parse_register_and_immediate(&p_reg2, &p_immed);
         if(valid_inst) {
+           push_binary();
            std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
         }
         return valid_inst;

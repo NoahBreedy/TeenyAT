@@ -6,7 +6,7 @@
 
 Preprocessor::Preprocessor(Lexer* root) {
     valid_program = true;
-    lexers.push(root); // move is pretty cool actually since we know we wont need root to hold the info no mo
+    lexers.push(root);
 }
 
 Lexer& Preprocessor::current_lexer() {
@@ -17,6 +17,12 @@ bool Preprocessor::is_active() {
     return cond_stack.empty() || cond_stack.top().enabled;
 }
 
+void Preprocessor::reset() {
+   /* get to our soruce files lexer */
+    while(lexers.size() > 1) {
+          lexers.pop();
+    }
+}
 
 token Preprocessor::next_token() {
     while (!lexers.empty()) {

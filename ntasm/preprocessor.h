@@ -14,6 +14,7 @@ public:
 
     token next_token();
     Lexer& current_lexer();
+    void reset();
     bool valid_program;
 
 private:
