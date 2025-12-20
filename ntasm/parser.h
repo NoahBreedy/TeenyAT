@@ -14,6 +14,7 @@ public:
     bool parse_program();
 
     std::vector<tny_word> bin_words;
+    std::string error_log;
 
 private:
     Preprocessor& pp;
@@ -40,6 +41,7 @@ private:
     void trace_parser(bool print_new_line);
 
     void push_binary();
+    void setup_program();
     
     void reset_lexer();
     void advance();
