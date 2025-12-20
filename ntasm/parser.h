@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
 #include "preprocessor.h"
 #include "token.h"
 #include "teenyat.h"
@@ -10,6 +12,8 @@ public:
     explicit Parser(Preprocessor& pp, bool debug);
 
     bool parse_program();
+
+    std::vector<tny_word> bin_words;
 
 private:
     Preprocessor& pp;
@@ -21,16 +25,23 @@ private:
     tny_word bin_word_0;
     tny_word bin_word_1;
 
+    tny_uword address;
+    tny_uword label_resolutions;
+
     /* Im making these teeny_words because I don't want the overload */
     tny_word p_opcode;
     bool     p_teeny;
     tny_word p_reg1;
     tny_word p_reg2;
     tny_word p_immed;
+    tny_word p_condition_flags;
     tny_word p_negative;
 
     void trace_parser(bool print_new_line);
 
+    void push_binary();
+    
+    void reset_lexer();
     void advance();
     bool match(token_type t);
     bool match(token_type t, tny_word* dest);

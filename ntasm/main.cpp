@@ -41,10 +41,20 @@ int main(int argc, char** argv) {
     Lexer* lexer = new Lexer(asm_lines, asm_filename.string());
     Preprocessor preprocessor(lexer);
     Parser parser(preprocessor, false);
-
+    
+    /** 
+     * I dont like this as it implies we have a valid program on one pass (labels might not be resolved) 
+     * but at this point im lazy to reimplement (ill change it when i rewrite this assembler in 2 years)
+     */
     bool valid_program = parser.parse_program();
+    if(valid_program) {
+        valid_program = parser.parse_program();
+    }
 
     if(valid_program) {
+        for(auto t : parser.bin_words) {
+            std::cout << std::hex << t.u << std::endl;
+        }
         std::cout << "Parse completed successfully.\n";
     }else {
         std::cout << "There were errors. No binary output.\n";
