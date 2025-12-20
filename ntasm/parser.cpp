@@ -17,6 +17,7 @@ Parser::Parser(Preprocessor& p, bool debug)
     p_immed.s = 0;
     p_negative.u = 0;
     p_condition_flags.u = 0;
+    error_log = "";
 }
 void Parser::reset_lexer() {
     pp.reset(); 
@@ -179,17 +180,25 @@ tny_word Parser::register_to_value(std::string s) {
     return register_value;
 }
 
-bool Parser::parse_program() {
-
+void Parser::setup_program() {
+     running_error_log = "";
     /* clear all binary words */
     bin_words.clear();
     label_resolutions++;
     /* we auto advance since the default state of the parser is empty T_EOL */
     advance();
+}
+
+bool Parser::parse_program() {
+    setup_program();
+
     while (current.type != T_EOL || !current.token_str.empty()) {
         parse_line();
         trace_parser(true);
     }
+
+    error_log =  running_error_log; // let our error_log match the running one
+
     return (valid_program && pp.valid_program);
 }
 

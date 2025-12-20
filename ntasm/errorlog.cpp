@@ -1,9 +1,11 @@
 #include "errorlog.h"
 
+std::string running_error_log = "";
+
 bool log_error(const token& tok, const std::string& message) {
-   std::cerr << "ERROR, ";
-   std::cerr << tok.source_file << " on line " << tok.line_num << ": ";
-   std::cerr << message << std::endl;
+   running_error_log += "ERROR, ";
+   running_error_log += tok.source_file + " on line " + std::to_string(tok.line_num) + ": ";
+   running_error_log += message + "\n";
    return false;
 }
 
