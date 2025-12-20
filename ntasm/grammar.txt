@@ -14,25 +14,23 @@
 <statement_body> ::= <label_line>
                    | <code_line>
 
-<pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> <pp_args>? T_EOL
-
-<pp_args>  ::= <pp_arg> <pp_args>
-             | <pp_arg>
+<pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> T_EOL
 
 <pp_arg>   ::= T_STRING
              | T_NUMBER
+             | T_LABEL
              | T_IDENTIFIER
 
 ;--------
 ; I dont pass these in as tokens since its simpler
 ; to handle this as terminal strings
 ;--------
-<pp_identifier> ::= "ifdef"
-                  | "ifndef"
+<pp_identifier> ::= "ifdef"    T_IDENTIFIER
+                  | "ifndef"   T_IDENTIFIER
                   | "endif"
-                  | "define"
-                  | "undefine"
-                  | "include"
+                  | "define"   T_IDENTIFIER <pp_arg>?
+                  | "undefine" T_IDENTIFIER
+                  | "include"  T_STRING
 
 <label_line> ::= T_LABEL
 
