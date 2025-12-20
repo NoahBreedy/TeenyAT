@@ -54,13 +54,15 @@ bool Parser::match(token_type t, tny_word* dest) {
     return false;
 }
 
-void Parser::expect(token_type t) {
+bool Parser::expect(token_type t) {
     if (!match(t)) {
         trace_parser(false);
         valid_program = false;
         /* we advance here since if we don't well end up in a looooop (canceled the early exit)*/
         advance();
+        return false;
     }
+    return true;
 }
 
 tny_word Parser::token_to_opcode(token_type t) {
@@ -153,10 +155,15 @@ void Parser::parse_line() {
     }
 
     bool matched = parse_statement();
-    
-    expect(T_EOL);
 
     if(!matched) {
+        std::string line = token_line_str(pp,current);
+        valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
+    }
+
+    bool valid_statement = expect(T_EOL); 
+
+    if(!valid_statement && matched) {
         std::string line = token_line_str(pp,current);
         valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
     }

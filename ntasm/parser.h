@@ -34,7 +34,7 @@ private:
     void advance();
     bool match(token_type t);
     bool match(token_type t, tny_word* dest);
-    void expect(token_type t);
+    bool expect(token_type t);
 
     void set_destination(token token, tny_word* dest);
     tny_word register_to_value(std::string s);
