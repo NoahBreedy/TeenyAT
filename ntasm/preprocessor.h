@@ -22,7 +22,7 @@ private:
     std::stack<Lexer*> lexers;
 
     /* Dictionary to hold our macros */
-    std::unordered_map<std::string, std::string> macros;
+    std::unordered_map<std::string, token> macros;
 
     /**
      * Conditional compilation stack

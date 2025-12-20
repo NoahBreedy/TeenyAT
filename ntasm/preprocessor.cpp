@@ -50,6 +50,7 @@ token Preprocessor::next_token() {
 void Preprocessor::handle_directive(const token& directive) {
     std::string name = directive.token_str.substr(1);
 
+    std::string line = token_line_str(current_lexer().src, directive);
     if      (name == "define")  handle_define();
     else if (name == "undef")   handle_undef();
     else if (name == "ifdef")   handle_ifdef(false);
@@ -57,7 +58,7 @@ void Preprocessor::handle_directive(const token& directive) {
     else if (name == "endif")   handle_endif(directive);
     else if (name == "include") handle_include();
     else {
-        valid_program = log_error(directive,"unknown directive @" + name);
+        valid_program = log_error(directive, ltrim(line) + "\tunknown directive @" + name);
         skip_line();
     }
 }
@@ -65,42 +66,77 @@ void Preprocessor::handle_directive(const token& directive) {
 void Preprocessor::handle_define() {
     token name = current_lexer().next_token();
 
+    std::string line = token_line_str(current_lexer().src,name);
     if (name.type != T_IDENTIFIER) {
-        valid_program = log_error(name, "Expected identifier after @define");
+        valid_program = log_error(name, ltrim(line) + "\texpected identifier after @define");
         skip_line();
         return;
     }
 
-    std::string value;
     token tok = current_lexer().next_token();
+    /* technically I should sanatize this through RD but im lazy */
+    
+    /* I cannot use the [] syntax on my token cuz there is no default */
+    macros.insert({ name.token_str, tok });
 
-    while (tok.type != T_EOL) {
-        value += tok.token_str;
-        tok = current_lexer().next_token();
+    if(tok.type != T_EOL) {
+        tok = current_lexer().peek_token();
+        if(tok.type != T_EOL) {
+            valid_program = log_error(tok, ltrim(line) + "\t@define can only reference one item!");
+        }
     }
-
-    macros[name.token_str] = value;
+    skip_line();
 }
 
 void Preprocessor::handle_undef() {
     token name = current_lexer().next_token();
-    macros.erase(name.token_str);
+
+    std::string line = token_line_str(current_lexer().src,name);
+    if(name.type != T_IDENTIFIER) {
+        valid_program = log_error(name, ltrim(line) + "\tinvalid identifier!");
+    }else if(macros.contains(name.token_str)) {
+        macros.erase(name.token_str);
+    }else {
+        valid_program = log_error(name, ltrim(line) + "\tundefining unknown identifier");
+    }
+
+    name = current_lexer().peek_token();
+    if(name.type != T_EOL) {
+        valid_program = log_error(name, ltrim(line) + "\t@undefine can only reference one item!");
+    }
+
     skip_line();
 }
 
 void Preprocessor::handle_ifdef(bool invert) {
     token name = current_lexer().next_token();
 
-    bool defined = macros.contains(name.token_str);
-    bool enable = invert ? !defined : defined;
+    std::string line = token_line_str(current_lexer().src,name);
 
-    cond_stack.push({ enable });
+    if(name.type != T_IDENTIFIER) {
+        valid_program = log_error(name, ltrim(line) + "\tinvalid identifier!");
+    }else if(current_lexer().peek_token().type != T_EOL) {
+        valid_program = log_error(name, ltrim(line) + "\tdirective only takes one parameter!");
+    }else {
+        bool defined = macros.contains(name.token_str);
+        bool enable = invert ? !defined : defined;
+
+        cond_stack.push({ enable });
+    }
     skip_line();
 }
 
 void Preprocessor::handle_endif(const token& directive) {
+    token t = current_lexer().peek_token();
+    std::string line = token_line_str(current_lexer().src,t);
+    if(t.type != T_EOL) {
+        valid_program = log_error(t, ltrim(line) + "\t@endif dosn't take extra parameters");
+        skip_line();
+        return;
+    }
     if (cond_stack.empty()) {
-        valid_program = log_error(directive, "Unmatched @endif");
+        valid_program = log_error(directive, ltrim(line) + "\t\tunmatched @endif");
+        skip_line();
         return;
     }
     cond_stack.pop();
@@ -110,8 +146,16 @@ void Preprocessor::handle_endif(const token& directive) {
 void Preprocessor::handle_include() {
     token path = current_lexer().next_token();
 
+    std::string line = token_line_str(current_lexer().src,path);
     if (path.type != T_STRING) {
-        valid_program = log_error(path, "@include requires string literal");
+        valid_program = log_error(path, ltrim(line) + "\t@include requires string literal");
+        skip_line();
+        return;
+    }
+
+    token t = current_lexer().peek_token();
+    if(t.type != T_EOL) {
+        valid_program = log_error(path, ltrim(line) + "\t@include takes only one parameter");
         skip_line();
         return;
     }
@@ -120,7 +164,7 @@ void Preprocessor::handle_include() {
 
     std::ifstream file(filename);
     if (!file) {
-        valid_program = log_error(path, "Could not open include file \"" + filename + "\"");
+        valid_program = log_error(path, ltrim(line) + "\tcould not open include file \"" + filename + "\"");
         skip_line();
         return;
     }
