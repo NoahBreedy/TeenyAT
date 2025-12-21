@@ -6,7 +6,8 @@
 
 Preprocessor::Preprocessor(Lexer* root) {
     valid_program = true;
-    lexers.push(root);
+    root_src = root->src;
+    root_filename = root->source_file;
 }
 
 Lexer& Preprocessor::current_lexer() {
@@ -17,17 +18,20 @@ bool Preprocessor::is_active() {
     return cond_stack.empty() || cond_stack.top().enabled;
 }
 
-void Preprocessor::reset() {
-   /* get to our soruce files lexer */
-    while(lexers.size() > 1) {
-          lexers.pop();
+void Preprocessor::reset_lexer() {
+    /* add the main lexer to the stack */
+    lexers.push(new Lexer(root_src, root_filename));
+    /* clear our condition stack */
+    while(!cond_stack.empty()) {
+          cond_stack.pop();
     }
+    macros.clear();
 }
 
 token Preprocessor::next_token() {
     while (!lexers.empty()) {
         token tok = current_lexer().next_token();
-
+        
         /* EOF of current lexer --> pop and continue */
         if (tok.type == T_EOL && tok.token_str.empty()) {
             lexers.pop();
@@ -71,7 +75,6 @@ void Preprocessor::handle_directive(const token& directive) {
 
 void Preprocessor::handle_define() {
     token name = current_lexer().next_token();
-
     std::string line = token_line_str(current_lexer().src,name);
     if (name.type != T_IDENTIFIER) {
         valid_program = log_error(name, ltrim(line) + "\texpected identifier after @define");

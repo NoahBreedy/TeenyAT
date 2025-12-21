@@ -16,14 +16,13 @@ public:
     token peek_token();
 
     std::string src;
+    std::string source_file;
 
 private:
     struct regex_rule {
         std::regex pattern;
         token_type type;
     };
-
-    std::string source_file;
 
     size_t pos;
     int line;

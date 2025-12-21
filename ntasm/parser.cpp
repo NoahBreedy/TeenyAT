@@ -20,7 +20,9 @@ Parser::Parser(Preprocessor& p, bool debug)
     error_log = "";
 }
 void Parser::reset_lexer() {
-    pp.reset(); 
+    pp.reset_lexer();
+    /* get our first token since current is initialized to EOF */
+    advance();
 }
 
 void Parser::advance() {
@@ -30,11 +32,11 @@ void Parser::advance() {
 void Parser::trace_parser(bool print_new_line) {
     if(debug_mode) {
         if(print_new_line) {
-            std::cout << '\n';
+            trace_log += '\n';
         }else {
             std::string s = current.token_str;
             if(s == "\n") s = "\\n";
-            std::cout << tstr[current.type] << "( " << s << " ) ";
+            trace_log += tstr[current.type] + "( " + s + " ) ";
         }
     }
 }
@@ -181,12 +183,13 @@ tny_word Parser::register_to_value(std::string s) {
 }
 
 void Parser::setup_program() {
-     running_error_log = "";
+    running_error_log = "";
+    trace_log         = "";
     /* clear all binary words */
     bin_words.clear();
     label_resolutions++;
-    /* we auto advance since the default state of the parser is empty T_EOL */
-    advance();
+
+    reset_lexer();
 }
 
 bool Parser::parse_program() {

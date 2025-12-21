@@ -14,13 +14,16 @@ public:
 
     token next_token();
     Lexer& current_lexer();
-    void reset();
+    void reset_lexer();
     bool valid_program;
 
 private:
 
     /* Stack of lexers (for @include) */
     std::stack<Lexer*> lexers;
+    
+    std::string root_src;
+    std::string root_filename;
 
     /* Dictionary to hold our macros */
     std::unordered_map<std::string, token> macros;

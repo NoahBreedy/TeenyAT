@@ -48,6 +48,10 @@ int main(int argc, char** argv) {
     /* Second pass resolve labels/identifiers */
     bool valid_program = parser.parse_program();
 
+    if(parser.debug_mode) {
+        std::cout << parser.trace_log << std::endl;    
+    }
+
     if(valid_program) {
         for(auto t : parser.bin_words) {
             std::cout << std::hex << t.u << std::endl;
