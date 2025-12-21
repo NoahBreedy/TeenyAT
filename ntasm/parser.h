@@ -15,12 +15,14 @@ public:
 
     std::vector<tny_word> bin_words;
     std::string error_log;
+    std::string trace_log;
+
+    bool debug_mode;
 
 private:
     Preprocessor& pp;
     token current;
 
-    bool debug_mode;
     bool valid_program;
 
     tny_word bin_word_0;
