@@ -22,15 +22,7 @@ std::string ltrim(std::string s) {
 std::string token_line_str(Preprocessor& pp, const token& tok) {
     /* get the current lexers assembly lines */
     std::string text = pp.current_lexer().src;
-    std::istringstream iss(text);
-    std::string line;
-    int current_line_num = 1;
-    while (std::getline(iss, line)) {
-        if (current_line_num == tok.line_num)
-            return line;
-        ++current_line_num;
-    }
-    return "";
+    return token_line_str(text, tok);
 }
 
 std::string token_line_str(std::string text, const token& tok) {
