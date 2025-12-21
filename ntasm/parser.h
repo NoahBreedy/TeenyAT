@@ -42,7 +42,7 @@ private:
 
     void trace_parser(bool print_new_line);
 
-    void push_binary();
+    void push_binary_instruction();
     void setup_program();
     
     void reset_lexer();
