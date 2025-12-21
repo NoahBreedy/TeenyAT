@@ -28,8 +28,16 @@ private:
     tny_word bin_word_0;
     tny_word bin_word_1;
 
-    tny_uword address;
+    tny_word address;
     tny_uword label_resolutions;
+
+    typedef struct container {
+        tny_word  value;
+        tny_uword instances;
+        tny_uword line_num;
+    } conainer;
+
+    std::unordered_map<std::string, conainer> labels;
 
     /* Im making these teeny_words because I don't want the overload */
     tny_word p_opcode;
@@ -44,7 +52,7 @@ private:
 
     void push_binary_instruction();
     void setup_program();
-    
+
     void reset_lexer();
     void advance();
     bool match(token_type t);

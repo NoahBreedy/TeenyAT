@@ -7,7 +7,7 @@
 Parser::Parser(Preprocessor& p, bool debug)
     : pp(p), current(T_EOL, "", 0) {
 
-    address = 0;
+    address.u = 0;
     label_resolutions = 0;
     debug_mode  = debug;
     valid_program = true;
@@ -67,11 +67,11 @@ void Parser::push_binary_instruction() {
     }
 
     bin_words.push_back(bin_word_0);
-    address++;
+    address.u++;
 
     if(!teeny) {
         bin_words.push_back(bin_word_1);
-        address++;
+        address.u++;
     }
 
 }
@@ -214,11 +214,16 @@ tny_word Parser::register_to_value(std::string s) {
 
 void Parser::setup_program() {
     running_error_log = "";
-    address = 0;
+    address.u = 0;
     trace_log         = "";
     /* clear all binary words */
     bin_words.clear();
     label_resolutions++;
+
+    /* reset instance count for labels */
+    for (const auto& elm : labels) {
+        labels[elm.first].instances = 0;
+    }
 
     reset_lexer();
 }
@@ -264,15 +269,25 @@ bool Parser::parse_statement() {
 }
 
 bool Parser::parse_label_line() {
-   if(!match(T_LABEL)) {
-        return false;
-   }
+    token label = current;
 
-   /* handle label nonsense like adding it to some dictionary and the current address
-    *
-    * remember I cant do this in set_detination because that only returns numbers of already
-    * processed labels
-    * */
+    if(!match(T_LABEL)) {
+        return false;
+    }
+
+    std::string label_name = label.token_str;
+    if(!labels.contains(label_name)) {
+        container obj = {value: address, instances: 1, line_num: (tny_uword)label.line_num};
+        labels.insert({ label_name, obj });
+    }else {
+        labels[label_name].instances++;
+        tny_uword line_num = labels[label_name].line_num;
+        if(labels[label_name].instances >= 2) {
+            std::string line = token_line_str(pp, label);
+            valid_program    =  log_error(label, ltrim(line) +
+                                "\tduplicate label definition (defined on line " + std::to_string(line_num) + ")");
+        }
+    }
 
    return true;
 }
