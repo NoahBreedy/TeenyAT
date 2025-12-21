@@ -34,15 +34,14 @@
 
 <label_line> ::= T_LABEL
 
-<number> ::= <plus_or_minus> T_NUMBER
-           | T_IDENTIFIER
-           | T_NUMBER
-
-<raw_value> ::=  <number>
+<raw_value> ::=  T_LABEL
+              |  T_NUMBER
               |  T_CHARACTER
+              |  T_IDENTIFIER
 
-<immediate> ::=  <raw_value>
-              |  T_LABEL
+<immediate> ::=  <plus_or_minus>? <raw_value>
+<no_sign_immediate> ::= <raw_value>
+
 
 <plus_or_minus> ::= T_PLUS
                   | T_MINUS
@@ -53,7 +52,7 @@
 ;------
 ; I put ε isntead of T_EOL since its already satisfied by <statement>
 ;------
-<includes_immediate> ::= <plus_or_minus> <immediate>
+<includes_immediate> ::= <plus_or_minus> <no_sign_immediate>
                        | ε
 
 <includes_register> ::= T_PLUS T_REGISTER

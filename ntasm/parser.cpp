@@ -19,10 +19,18 @@ Parser::Parser(Preprocessor& p, bool debug)
     p_condition_flags.u = 0;
     error_log = "";
 }
+
 void Parser::reset_lexer() {
     pp.reset_lexer();
     /* get our first token since current is initialized to EOF */
     advance();
+}
+
+void Parser::skip_line() {
+    while(current.type != T_EOL) {
+        trace_parser(false);
+        advance();
+    }
 }
 
 void Parser::advance() {
@@ -142,7 +150,7 @@ tny_word Parser::process_label(std::string s) {
     }
 
     if(p_negative.u) {
-       result.s *= -1; 
+       result.s *= -1;
     }
 
     return result;
@@ -172,9 +180,9 @@ tny_word Parser::process_character(std::string s) {
         std::string line = token_line_str(pp, current);
         valid_program = log_error(current, ltrim(line) + "\tinvalid escape character");
     }
-    
+
     if(p_negative.u) {
-       result.s *= -1; 
+       result.s *= -1;
     }
 
     return result;
@@ -320,36 +328,43 @@ bool Parser::parse_code_line() {
     return matched_code_line;
 }
 
-bool Parser::parse_number(tny_word* immed) {
+bool Parser::parse_raw_value(tny_word* immed) {
+    if(match(T_CHARACTER, immed)) {
+        return true;
+    }
+
     if(match(T_IDENTIFIER, immed)) {
         return true;
     }
+
     if(match(T_NUMBER, immed)) {
         return true;
     }
-    if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
-        return match(T_NUMBER, immed);
+
+    if(match(T_LABEL, immed)) {
+        return true;
     }
+
     return false;
 }
 
-bool Parser::parse_raw_value(tny_word* immed) {
-   if(match(T_CHARACTER, immed)) {
-       return true;
+bool Parser::parse_immediate(tny_word* immed) {
+   if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
+        return parse_raw_value(immed);
    }
-   return parse_number(immed);
+
+   /* this means its just the value given no negation needed */
+   p_negative.u = 0;
+   return parse_raw_value(immed);
 }
 
-bool Parser::parse_immediate(tny_word* immed) {
-   if(match(T_LABEL, immed)) {
-     return true;
-   }
-   return parse_raw_value(immed);
+bool Parser::parse_no_sign_immediate(tny_word* immed) {
+    return parse_raw_value(immed);
 }
 
 bool Parser::parse_includes_immediate(tny_word* immed) {
     if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
-       return parse_immediate(immed);
+        return parse_no_sign_immediate(immed);
     }
 
     return immed->u = 0, current.type == T_EOL;
@@ -377,11 +392,12 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 
 bool Parser::parse_set_instruction() {
     if(match(T_SET, &p_opcode) && match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
-        p_negative.u = 0;
         bool valid_inst = parse_register_and_immediate(&p_reg2, &p_immed);
         if(valid_inst) {
-           push_binary_instruction();
-           std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
+            push_binary_instruction();
+            std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
+        }else {
+            skip_line();
         }
         return valid_inst;
     }

@@ -55,6 +55,7 @@ private:
 
     void reset_lexer();
     void advance();
+    void skip_line();
     bool match(token_type t);
     bool match(token_type t, tny_word* dest);
     bool expect(token_type t);
@@ -71,9 +72,9 @@ private:
     bool parse_label_line();
     bool parse_code_line();
 
-    bool parse_number(tny_word* immed);
     bool parse_raw_value(tny_word* immed);
     bool parse_immediate(tny_word* immed);
+    bool parse_no_sign_immediate(tny_word* immed);
     bool parse_includes_immediate(tny_word* immed);
     bool parse_includes_register(tny_word* reg);
     bool parse_register_and_immediate(tny_word* reg, tny_word* immed);
