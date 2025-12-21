@@ -21,7 +21,6 @@ bool Preprocessor::is_active() {
 void Preprocessor::reset_lexer() {
     /* add the main lexer to the stack */
     lexers.push(new Lexer(root_src, root_filename));
-    /* clear our condition stack */
     while(!cond_stack.empty()) {
           cond_stack.pop();
     }
@@ -46,11 +45,9 @@ token Preprocessor::next_token() {
 
         /* Skip tokens if in inactive blocks */
         if (!is_active()) {
-            if (tok.type == T_EOL)
-                continue;
             continue;
         }
-
+     
         return tok;
     }
 
@@ -59,6 +56,13 @@ token Preprocessor::next_token() {
 
 void Preprocessor::handle_directive(const token& directive) {
     std::string name = directive.token_str.substr(1);
+
+    for(char& c : name) {
+        c = std::tolower(c);
+    }
+    
+    /* need endif to be enabled even if in inactive zone */
+    if(!is_active() && name != "endif") return;
 
     std::string line = token_line_str(current_lexer().src, directive);
     if      (name == "define")  handle_define();
