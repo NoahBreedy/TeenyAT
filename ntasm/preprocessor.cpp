@@ -88,9 +88,9 @@ void Preprocessor::handle_define() {
 
     token tok = current_lexer().next_token();
     /* technically I should sanatize this through RD but im lazy */
-    
+
     /* I cannot use the [] syntax on my token cuz there is no default */
-    macros.insert({ name.token_str, tok });
+    macros.insert_or_assign(name.token_str, tok);
 
     if(tok.type != T_EOL) {
         tok = current_lexer().peek_token();
