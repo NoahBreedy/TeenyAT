@@ -6,7 +6,7 @@
 
 Parser::Parser(Preprocessor& p, bool debug)
     : pp(p), current(T_EOL, "", 0) {
-    
+
     address = 0;
     label_resolutions = 0;
     debug_mode  = debug;
@@ -52,7 +52,7 @@ void Parser::push_binary_instruction() {
     /* map our processed values into its associated fields */
 
     bin_word_0.instruction.opcode =  p_opcode.u;
-    bin_word_0.instruction.teeny  =  0;  
+    bin_word_0.instruction.teeny  =  0;
     bin_word_0.instruction.reg1   =  p_reg1.u;
     bin_word_0.instruction.reg2   =  p_reg2.u;
     bin_word_0.instruction.immed4 =  p_condition_flags.u;
@@ -62,16 +62,16 @@ void Parser::push_binary_instruction() {
     bool teeny = is_teeny(p_immed.s);
     /* we check if condition flags is zero since and jmp instruction will have all 1s in it */
     if(teeny && p_condition_flags.u == 0) {
-       bin_word_0.instruction.immed4 = p_immed.s;  
-       bin_word_0.instruction.teeny  = 1;  
+       bin_word_0.instruction.immed4 = p_immed.s;
+       bin_word_0.instruction.teeny  = 1;
     }
 
     bin_words.push_back(bin_word_0);
-    address++; 
+    address++;
 
     if(!teeny) {
         bin_words.push_back(bin_word_1);
-        address++; 
+        address++;
     }
 
 }
@@ -114,7 +114,6 @@ tny_word Parser::token_to_opcode(token_type t) {
 }
 
 void Parser::set_destination(token token, tny_word* dest) {
-    char* c;
     switch(token.type) {
         case T_REGISTER:        *dest = register_to_value(token.token_str); break;
         case T_PLUS:            *dest = tny_word{u: 0}; break;
@@ -122,13 +121,41 @@ void Parser::set_destination(token token, tny_word* dest) {
         case T_NUMBER:          *dest = process_number(token.token_str); break;
         case T_LABEL:           *dest = tny_word{u: 67}; break;
         case T_IDENTIFIER:      *dest = tny_word{u: 69}; break;
-        case T_CHARACTER:       *dest = tny_word{u: 420}; break;
+        case T_CHARACTER:       *dest = process_character(token.token_str); break;
         case T_STRING:          *dest = tny_word{u: 421}; break;
         case T_PACKED_STRING:   *dest = tny_word{u: 422}; break;
         /* this means its an opcode */
         default: *dest = token_to_opcode(token.type); break;
    }
    return;
+}
+
+tny_word Parser::process_character(std::string s) {
+    tny_word result;
+    bool invalid = false;
+    result.u = s[1];
+
+    if(s[1] == '\\') {
+        switch(s[2]) {
+            case 'n':  result.u = '\n'; break;
+            case 't':  result.u = '\t'; break;
+            case 'v':  result.u = '\v'; break;
+            case 'r':  result.u = '\r'; break;
+            case 'f':  result.u = '\f'; break;
+            case '\\': result.u = '\\'; break;
+            case '\'': result.u = '\''; break;
+            case '\"': result.u = '\"'; break;
+            case '0':  result.u = '\0'; break;
+            default:   invalid = true;  break;
+        }
+    }
+
+    if(invalid) {
+        std::string line = token_line_str(pp, current);
+        valid_program = log_error(current, ltrim(line) + "\tinvalid escape character");
+    }
+
+   return result;
 }
 
 tny_word Parser::process_number(std::string s) {
@@ -187,6 +214,7 @@ tny_word Parser::register_to_value(std::string s) {
 
 void Parser::setup_program() {
     running_error_log = "";
+    address = 0;
     trace_log         = "";
     /* clear all binary words */
     bin_words.clear();
@@ -220,7 +248,7 @@ void Parser::parse_line() {
         valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
     }
 
-    bool valid_statement = expect(T_EOL); 
+    bool valid_statement = expect(T_EOL);
 
     if(!valid_statement && matched) {
         std::string line = token_line_str(pp,current);
@@ -239,7 +267,13 @@ bool Parser::parse_label_line() {
    if(!match(T_LABEL)) {
         return false;
    }
-   /* handle label nonsense like adding it to some dictionary and the current address */
+
+   /* handle label nonsense like adding it to some dictionary and the current address
+    *
+    * remember I cant do this in set_detination because that only returns numbers of already
+    * processed labels
+    * */
+
    return true;
 }
 

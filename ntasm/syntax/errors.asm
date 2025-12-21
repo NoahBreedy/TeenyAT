@@ -6,4 +6,5 @@
 @include "me.S" "you.me"
 @include "me.S"
 @ifdef MY_MACRO 0 0
+set rA, '\s'
 
