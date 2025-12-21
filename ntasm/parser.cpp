@@ -116,12 +116,15 @@ tny_word Parser::token_to_opcode(token_type t) {
 void Parser::set_destination(token token, tny_word* dest) {
     char* c;
     switch(token.type) {
-        case T_REGISTER:    *dest = register_to_value(token.token_str); break;
-        case T_PLUS:        *dest = tny_word{u: 0}; break;
-        case T_MINUS:       *dest = tny_word{u: 1}; break;
-        case T_NUMBER:      *dest = process_number(token.token_str); break;
-        case T_LABEL:       *dest = tny_word{u: 67}; break;
-        case T_IDENTIFIER:  *dest = tny_word{u: 69}; break;
+        case T_REGISTER:        *dest = register_to_value(token.token_str); break;
+        case T_PLUS:            *dest = tny_word{u: 0}; break;
+        case T_MINUS:           *dest = tny_word{u: 1}; break;
+        case T_NUMBER:          *dest = process_number(token.token_str); break;
+        case T_LABEL:           *dest = tny_word{u: 67}; break;
+        case T_IDENTIFIER:      *dest = tny_word{u: 69}; break;
+        case T_CHARACTER:       *dest = tny_word{u: 420}; break;
+        case T_STRING:          *dest = tny_word{u: 421}; break;
+        case T_PACKED_STRING:   *dest = tny_word{u: 422}; break;
         /* this means its an opcode */
         default: *dest = token_to_opcode(token.type); break;
    }
