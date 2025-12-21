@@ -55,6 +55,7 @@ private:
     tny_word register_to_value(std::string s);
     tny_word token_to_opcode(token_type t);
     tny_word process_number(std::string s);
+    tny_word process_character(std::string s);
 
     void parse_line();
     bool parse_statement();
