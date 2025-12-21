@@ -119,7 +119,7 @@ void Parser::set_destination(token token, tny_word* dest) {
         case T_PLUS:            *dest = tny_word{u: 0}; break;
         case T_MINUS:           *dest = tny_word{u: 1}; break;
         case T_NUMBER:          *dest = process_number(token.token_str); break;
-        case T_LABEL:           *dest = tny_word{u: 67}; break;
+        case T_LABEL:           *dest = process_label(token.token_str); break;
         case T_IDENTIFIER:      *dest = tny_word{u: 69}; break;
         case T_CHARACTER:       *dest = process_character(token.token_str); break;
         case T_STRING:          *dest = tny_word{u: 421}; break;
@@ -128,6 +128,24 @@ void Parser::set_destination(token token, tny_word* dest) {
         default: *dest = token_to_opcode(token.type); break;
    }
    return;
+}
+
+tny_word Parser::process_label(std::string s) {
+    tny_word result;
+    result.u = 0;
+
+    if(labels.contains(s)) {
+        result.u =  labels[s].value.u;
+    }else {
+        std::string line = token_line_str(pp, current);
+        valid_program = log_error(current, ltrim(line) + "\t unknown label \"" + s + "\"");
+    }
+
+    if(p_negative.u) {
+       result.s *= -1; 
+    }
+
+    return result;
 }
 
 tny_word Parser::process_character(std::string s) {
@@ -154,8 +172,12 @@ tny_word Parser::process_character(std::string s) {
         std::string line = token_line_str(pp, current);
         valid_program = log_error(current, ltrim(line) + "\tinvalid escape character");
     }
+    
+    if(p_negative.u) {
+       result.s *= -1; 
+    }
 
-   return result;
+    return result;
 }
 
 tny_word Parser::process_number(std::string s) {
@@ -213,6 +235,7 @@ tny_word Parser::register_to_value(std::string s) {
 }
 
 void Parser::setup_program() {
+    valid_program = true;
     running_error_log = "";
     address.u = 0;
     trace_log         = "";
@@ -312,7 +335,6 @@ bool Parser::parse_number(tny_word* immed) {
 
 bool Parser::parse_raw_value(tny_word* immed) {
    if(match(T_CHARACTER, immed)) {
-       /* return the number of the char and be wary of p_negative and escape chars */
        return true;
    }
    return parse_number(immed);
@@ -320,7 +342,6 @@ bool Parser::parse_raw_value(tny_word* immed) {
 
 bool Parser::parse_immediate(tny_word* immed) {
    if(match(T_LABEL, immed)) {
-     /* return the address of the label and be wary of p_negative */
      return true;
    }
    return parse_raw_value(immed);
@@ -356,6 +377,7 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 
 bool Parser::parse_set_instruction() {
     if(match(T_SET, &p_opcode) && match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
+        p_negative.u = 0;
         bool valid_inst = parse_register_and_immediate(&p_reg2, &p_immed);
         if(valid_inst) {
            push_binary_instruction();
