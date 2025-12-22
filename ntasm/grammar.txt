@@ -80,6 +80,15 @@
               | <btc_instruction>
               | <btf_instruction>
               | <cal_instruction>
+              | <add_instruction>
+              | <sub_instruction>
+              | <mpy_instruction>
+              | <div_instruction>
+              | <mod_instruction>
+              | <and_instruction>
+              | <or_instruction>
+              | <xor_instruction>
+              | <shf_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -101,3 +110,15 @@
 
 ; uses reg2
 <cal_instruction> ::= T_CAL <register_and_immediate>
+
+<add_instruction> ::= T_ADD T_REGISTER T_COMMA <register_and_immediate>
+<sub_instruction> ::= T_SUB T_REGISTER T_COMMA <register_and_immediate>
+<mpy_instruction> ::= T_MPY T_REGISTER T_COMMA <register_and_immediate>
+<div_instruction> ::= T_DIV T_REGISTER T_COMMA <register_and_immediate>
+<mod_instruction> ::= T_MOD T_REGISTER T_COMMA <register_and_immediate>
+<and_instruction> ::= T_AND T_REGISTER T_COMMA <register_and_immediate>
+<or_instruction>  ::= T_OR  T_REGISTER T_COMMA <register_and_immediate>
+<xor_instruction> ::= T_XOR T_REGISTER T_COMMA <register_and_immediate>
+<shf_instruction> ::= T_SHF T_REGISTER T_COMMA <register_and_immediate>
+
+

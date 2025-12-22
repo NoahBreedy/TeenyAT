@@ -160,6 +160,15 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_BTC: return tny_word{u: TNY_OPCODE_BTC};
         case T_BTF: return tny_word{u: TNY_OPCODE_BTF};
         case T_CAL: return tny_word{u: TNY_OPCODE_CAL};
+        case T_ADD: return tny_word{u: TNY_OPCODE_ADD};
+        case T_SUB: return tny_word{u: TNY_OPCODE_SUB};
+        case T_MPY: return tny_word{u: TNY_OPCODE_MPY};
+        case T_DIV: return tny_word{u: TNY_OPCODE_DIV};
+        case T_MOD: return tny_word{u: TNY_OPCODE_MOD};
+        case T_AND: return tny_word{u: TNY_OPCODE_AND};
+        case T_OR:  return tny_word{u: TNY_OPCODE_OR };
+        case T_XOR: return tny_word{u: TNY_OPCODE_XOR};
+        case T_SHF: return tny_word{u: TNY_OPCODE_SHF};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -769,7 +778,17 @@ bool Parser::parse_code_line() {
                              parse_bts_instruction() ||
                              parse_btc_instruction() ||
                              parse_btf_instruction() ||
-                             parse_cal_instruction();
+                             parse_cal_instruction() ||
+                             parse_add_instruction() ||
+                             parse_sub_instruction() ||
+                             parse_mpy_instruction() ||
+                             parse_div_instruction() ||
+                             parse_mod_instruction() ||
+                             parse_and_instruction() ||
+                             parse_or_instruction()  ||
+                             parse_xor_instruction() ||
+                             parse_shf_instruction();
+
     return matched_code_line;
 }
 
@@ -905,6 +924,105 @@ bool Parser::parse_cal_instruction() {
     if(match(T_CAL, &p_opcode)) {
         p_reg1.u = TNY_REG_ZERO;
         if(parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_add_instruction() {
+    if(match(T_ADD, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_sub_instruction() {
+    if(match(T_SUB, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_mpy_instruction() {
+    if(match(T_MPY, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_div_instruction() {
+    if(match(T_DIV, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_mod_instruction() {
+    if(match(T_MOD, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_and_instruction() {
+    if(match(T_AND, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_or_instruction() {
+    if(match(T_OR, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_xor_instruction() {
+    if(match(T_XOR, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_shf_instruction() {
+    if(match(T_SHF, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
                 push_binary_instruction();
                 return true;
         }
