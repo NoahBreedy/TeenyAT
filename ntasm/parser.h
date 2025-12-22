@@ -49,6 +49,7 @@ private:
     tny_word p_immed;
     tny_word p_condition_flags;
     tny_word p_negative;
+    bool     jump_inst;
 
     void trace_parser(bool print_new_line);
 
