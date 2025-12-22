@@ -56,6 +56,11 @@ bool is_teeny(tny_sword n) {
     return small.instruction.immed4 == n;
 }
 
+void Parser::push_binary_value(tny_word value) {
+    bin_words.push_back(value);
+    address.u++;
+}
+
 void Parser::push_binary_instruction() {
     /* map our processed values into its associated fields */
 
@@ -285,6 +290,7 @@ void Parser::setup_program() {
     }
 
     reset_lexer();
+    std::cout << "\nSTEP " << label_resolutions << std::endl;
 }
 
 bool Parser::parse_program() {
@@ -324,6 +330,7 @@ void Parser::parse_line() {
 bool Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
                              parse_constant_line() ||
+                             parse_variable_line() ||
                              parse_code_line();
 
     return matched_statement;
@@ -366,7 +373,7 @@ bool Parser::parse_constant_line() {
     if(!match(T_IDENTIFIER)) {
         valid_program = log_error(constant_token, ltrim(line) + "\tinvalid identifier \"" + name + "\"");
         skip_line();
-        return false;
+        return true;
     }
     
     tny_word value;
@@ -374,7 +381,7 @@ bool Parser::parse_constant_line() {
     if(!valid_immed) {
         valid_program = log_error(constant_token, ltrim(line) + "\tinvalid constant value");
         skip_line();
-        return false;
+        return true;
     }
 
     if(!consts_and_vars.contains(name)) {
@@ -393,6 +400,78 @@ bool Parser::parse_constant_line() {
 
     return true;
 
+}
+
+bool Parser::parse_variable_format() {
+    tny_word value;
+    tny_word zero;
+    zero.s = 0;
+    
+    /* if nothing push zero */
+    if(current.type == T_EOL) {
+        push_binary_value(zero);
+        return true;
+    }
+
+    /* This means we are going to push zeros into memeory X times */
+    if(match(T_LBRACKET) && parse_no_sign_immediate(&value) && match(T_RBRACKET)) {
+         for(int i = 0; i < value.u; i++) {
+            push_binary_value(zero);
+         }
+         return true; 
+    }
+
+    /* loop through our immediates */
+    while(parse_immediate(&value)) {
+        push_binary_value(value);
+    }
+    
+    return current.type == T_EOL;
+
+}
+
+bool Parser::parse_variable_line() {
+    if(!match(T_VARIABLE)) {
+        return false;
+    }
+
+    token variable_token = current;
+    std::string name = variable_token.token_str;
+    std::string line = token_line_str(pp, variable_token);
+
+    if(!match(T_IDENTIFIER)) {
+        valid_program = log_error(variable_token, ltrim(line) + "\tinvalid identifier \"" + name + "\"");
+        skip_line();
+        return false;
+    }
+    
+    /* save the starting address */
+    tny_word base_address = address;
+
+    bool valid = parse_variable_format();
+
+    if(!valid) {
+        valid_program = log_error(variable_token, ltrim(line) + "\tinvalid variable format");
+        skip_line();
+        return true;
+    }
+
+    if(!consts_and_vars.contains(name)) {
+        container obj = {value: base_address, instances: 1, line_num: (tny_uword)variable_token.line_num, file_name:variable_token.source_file};
+        consts_and_vars.insert({ name, obj });
+    }else {
+        consts_and_vars[name].instances++;
+        tny_uword line_num = consts_and_vars[name].line_num;
+        std::string file_name = consts_and_vars[name].file_name;
+        if(consts_and_vars[name].instances > 1) {
+            std::string line = token_line_str(pp, variable_token);
+            valid_program    =  log_error(variable_token, ltrim(line) +
+                                "\tduplicate identifier \"" + name + "\" (defined in " + file_name + " on line " + std::to_string(line_num) + ")");
+        }
+    }
+
+    return true;
+    
 }
 
 bool Parser::parse_code_line() {
