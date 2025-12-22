@@ -722,6 +722,8 @@ bool Parser::parse_immediate(tny_word* immed) {
 }
 
 bool Parser::parse_no_sign_immediate(tny_word* immed) {
+    /* all no sign immediates are positive */
+    p_negative.u = 0;
     return parse_raw_value(immed);
 }
 
