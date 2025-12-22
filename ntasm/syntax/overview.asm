@@ -8,11 +8,17 @@
 
 jmp !main
 
-.var my_var [12]
+.const MY_CONST 10
 
-.raw !main 10 20 30 40
+.var my_var [12]
+.var second_var -10
+.var third_var
+
+.raw !main 10 0b_0_110_1 30 -!test_label 0xBEEF 0o3745
 
 !main
-    add rA, 10
-    jmp !main
-
+    set rA, MY_CONST
+    set r5, -!main
+    set rd, rZ + !main
+    set rb, -MY_CONST + rA
+    jmp !main ; coolio
