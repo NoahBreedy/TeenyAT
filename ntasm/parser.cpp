@@ -351,6 +351,7 @@ tny_word Parser::register_to_value(std::string s) {
 void Parser::setup_program() {
     valid_program = true;
     running_error_log = "";
+    running_warning_log = "";
     address.u = 0;
     jump_inst = false;
     trace_log         = "";
@@ -380,7 +381,8 @@ bool Parser::parse_program() {
         trace_parser(true);
     }
 
-    error_log =  running_error_log; // let our error_log match the running one
+    error_log   =  running_error_log; // let our error_log match the running one
+    warning_log =  running_warning_log; // let our warning_log match the running one
 
     return (valid_program && pp.valid_program);
 }
@@ -514,10 +516,14 @@ bool Parser::parse_variable_line() {
     if(!match(T_VARIABLE)) {
         return false;
     }
-
+    
     token variable_token = current;
     std::string name = variable_token.token_str;
     std::string line = token_line_str(pp, variable_token);
+
+    if(address.u == 0) {
+        log_warning(current, "A variable at address 0x0000 is unsafe. It will be executed as code."); 
+    }
 
     if(!match(T_IDENTIFIER)) {
         valid_program = log_error(variable_token, ltrim(line) + "\tinvalid identifier \"" + name + "\"");
@@ -571,6 +577,10 @@ bool Parser::parse_raw_line_value() {
 bool Parser::parse_raw_line() {
     if(!match(T_RAW)) {
         return false;
+    }
+
+    if(address.u == 0) {
+        log_warning(current, "Data at address 0x0000 is unsafe. It will be executed as code."); 
     }
 
     token t = current;

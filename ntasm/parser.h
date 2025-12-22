@@ -16,6 +16,7 @@ public:
     std::vector<tny_word> bin_words;
     std::string error_log;
     std::string trace_log;
+    std::string warning_log;
 
     bool debug_mode;
 
