@@ -17,6 +17,7 @@ Parser::Parser(Preprocessor& p, bool debug)
     p_immed.s = 0;
     p_negative.u = 0;
     p_condition_flags.u = 0;
+    jump_inst = false;
     error_log = "";
 }
 
@@ -73,8 +74,9 @@ void Parser::push_binary_instruction() {
     bin_word_1.s = p_immed.s;
 
     bool teeny = is_teeny(p_immed.s);
-    /* we check if condition flags is zero since and jmp instruction will have all 1s in it */
-    if(teeny && p_condition_flags.u == 0) {
+
+    /* jmp instructions cannot be teeny unfortunately */
+    if(teeny && !jump_inst) {
        bin_word_0.instruction.immed4 = p_immed.s;
        bin_word_0.instruction.teeny  = 1;
     }
@@ -350,6 +352,7 @@ void Parser::setup_program() {
     valid_program = true;
     running_error_log = "";
     address.u = 0;
+    jump_inst = false;
     trace_log         = "";
     /* clear all binary words */
     bin_words.clear();
