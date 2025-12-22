@@ -31,6 +31,6 @@ private:
     std::vector<regex_rule> rules;
 
     void init_rules();
-    bool match_rule(const regex_rule& rule, token& out);
+    bool match_rule(const regex_rule& rule, std::cmatch& match_out);
 };
 
