@@ -807,8 +807,7 @@ bool Parser::parse_psh_format() {
     /* The stack pointer is the default register for psh */
     p_reg1.u = TNY_REG_SP;
 
-    if(match(T_REGISTER, &p_reg2)) {
-        p_immed.s = 0;
+    if(parse_register_and_immediate(&p_reg2, &p_immed)) {
         return true;
     }
 
