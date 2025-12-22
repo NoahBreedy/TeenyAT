@@ -437,15 +437,17 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 }
 
 bool Parser::parse_set_instruction() {
-    if(match(T_SET, &p_opcode) && match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
-        bool valid_inst = parse_register_and_immediate(&p_reg2, &p_immed);
-        if(valid_inst) {
-            push_binary_instruction();
-            std::cout << p_opcode.u << " " << p_reg1.u << " " << p_reg2.u << " " << p_immed.s << std::endl;
-        }else {
+    if(match(T_SET, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
+            if(parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+            }
             skip_line();
+            return false;
         }
-        return valid_inst;
+        skip_line();
+        return false;
     }
     return false;
 }
