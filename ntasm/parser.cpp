@@ -84,7 +84,7 @@ void Parser::push_binary_instruction() {
 
     std::cout << bin_word_0.instruction.opcode << " " << bin_word_0.instruction.teeny << " " << bin_word_0.instruction.reg1 << " " << bin_word_0.instruction.reg2 << " " << bin_word_0.instruction.immed4;
     if(!teeny) {
-        std::cout << bin_word_1.s;
+        std::cout << '\n' << bin_word_1.s;
     }
     std::cout << '\n';
 
@@ -134,7 +134,7 @@ void Parser::set_destination(token token, tny_word* dest) {
         case T_MINUS:           *dest = tny_word{u: 1}; break;
         case T_NUMBER:          *dest = process_number(token.token_str); break;
         case T_LABEL:           *dest = process_label(token.token_str); break;
-        case T_IDENTIFIER:      *dest = tny_word{u: 69}; break;
+        case T_IDENTIFIER:      *dest = process_identifier(token.token_str); break;
         case T_CHARACTER:       *dest = process_character(token.token_str); break;
         case T_STRING:          *dest = tny_word{u: 421}; break;
         case T_PACKED_STRING:   *dest = tny_word{u: 422}; break;
@@ -142,6 +142,23 @@ void Parser::set_destination(token token, tny_word* dest) {
         default: *dest = token_to_opcode(token.type); break;
    }
    return;
+}
+
+tny_word Parser::process_identifier(std::string s) {
+    tny_word result;
+
+    if(consts_and_vars.contains(s)) {
+        result.s =  consts_and_vars[s].value.s;
+    }else {
+        std::string line = token_line_str(pp, current);
+        valid_program = log_error(current, ltrim(line) + "\tunknown identifier \"" + s + "\"");
+    }
+
+    if(p_negative.u) {
+       result.s *= -1;
+    }
+
+    return result;
 }
 
 tny_word Parser::process_label(std::string s) {
@@ -354,7 +371,7 @@ bool Parser::parse_constant_line() {
     tny_word value;
     bool valid_immed = parse_immediate(&value);
     if(!valid_immed) {
-        valid_program = log_error(constant_token, ltrim(line) + "\tinvalid constant value \"" + name + "\"");
+        valid_program = log_error(constant_token, ltrim(line) + "\tinvalid constant value");
         skip_line();
         return false;
     }
@@ -368,7 +385,7 @@ bool Parser::parse_constant_line() {
         if(consts_and_vars[name].instances > 1) {
             std::string line = token_line_str(pp, constant_token);
             valid_program    =  log_error(constant_token, ltrim(line) +
-                                "\tduplicate identifier definition (defined on line " + std::to_string(line_num) + ")");
+                                "\tduplicate identifier \"" + name + "\" (defined on line " + std::to_string(line_num) + ")");
         }
     }
 

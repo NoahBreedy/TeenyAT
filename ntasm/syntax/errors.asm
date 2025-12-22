@@ -9,4 +9,9 @@
 !test_label
 set rA, '\s'
 !test_label
+.const hello 
+.const hello 10
+.const yo 10
+.const yo 11
+set rA, hell
 
