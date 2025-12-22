@@ -159,6 +159,7 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_BTS: return tny_word{u: TNY_OPCODE_BTS};
         case T_BTC: return tny_word{u: TNY_OPCODE_BTC};
         case T_BTF: return tny_word{u: TNY_OPCODE_BTF};
+        case T_CAL: return tny_word{u: TNY_OPCODE_CAL};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -767,7 +768,8 @@ bool Parser::parse_code_line() {
                              parse_pop_instruction() ||
                              parse_bts_instruction() ||
                              parse_btc_instruction() ||
-                             parse_btf_instruction();
+                             parse_btf_instruction() ||
+                             parse_cal_instruction();
     return matched_code_line;
 }
 
@@ -891,6 +893,18 @@ bool Parser::parse_btc_instruction() {
 bool Parser::parse_btf_instruction() {
     if(match(T_BTF, &p_opcode)) {
         if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_cal_instruction() {
+    if(match(T_CAL, &p_opcode)) {
+        p_reg1.u = TNY_REG_ZERO;
+        if(parse_register_and_immediate(&p_reg2, &p_immed)) {
                 push_binary_instruction();
                 return true;
         }

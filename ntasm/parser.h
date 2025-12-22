@@ -110,5 +110,6 @@ private:
     bool parse_bts_instruction();
     bool parse_btc_instruction();
     bool parse_btf_instruction();
+    bool parse_cal_instruction();
 };
 
