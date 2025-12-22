@@ -77,7 +77,15 @@
 <code_line> ::= <set_instruction>
               | <lod_instruction>
               | <str_instruction>
+              | <psh_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
+
 <lod_instruction> ::= T_LOD T_REGISTER T_COMMA T_LBRACKET <register_and_immediate> T_RBRACKET
+
 <str_instruction> ::= T_SET T_LBRACKET <register_and_immediate> T_RBRACKET T_COMMA T_REGISTER
+
+<psh_instruction> ::= T_PSH <psh_format>
+<psh_format>      ::= T_LBRACKET T_REGISTER T_RBRACKET T_COMMA <register_and_immediate>
+                    | T_REGISTER
+                    | <immediate>
