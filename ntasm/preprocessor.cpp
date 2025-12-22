@@ -25,6 +25,8 @@ void Preprocessor::reset_lexer() {
           cond_stack.pop();
     }
     macros.clear();
+    opened_files.clear();
+    opened_files[root_filename] = 1;
 }
 
 token Preprocessor::next_token() {
@@ -35,6 +37,8 @@ token Preprocessor::next_token() {
         if (tok.type == T_EOL && tok.token_str.empty()) {
             lexers.pop();
             if(!lexers.empty()) { 
+                /* close the file opened */
+                opened_files.erase(tok.source_file);
                 oss << "---------- " << "EOF" << " -----------\n";
             }
             continue;
@@ -176,14 +180,25 @@ void Preprocessor::handle_include() {
         return;
     }
 
+    std::string filename = path.token_str.substr(1, path.token_str.size() - 2);
+
+    if(opened_files.contains(filename)) {
+        if(opened_files[filename]++ > INCLUDE_THRESHOLD) {
+            std::cerr << "FATAL ERROR: " << path.source_file << " on line " << 
+                std::to_string(path.line_num) << " " << ltrim(line) << "\tmax amount of file includes reached (potential cyclic include?)" << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+        log_warning(path, "file has been included more than once (potential cyclic include?)");
+    }else{
+        opened_files[filename] = 0;
+    }
+
     token t = current_lexer().peek_token();
     if(t.type != T_EOL) {
         valid_program = log_error(path, ltrim(line) + "\t@include takes only one parameter");
         skip_line();
         return;
     }
-
-    std::string filename = path.token_str.substr(1, path.token_str.size() - 2);
 
     std::ifstream file(filename);
     if (!file) {
