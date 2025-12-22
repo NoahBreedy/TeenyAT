@@ -107,5 +107,8 @@ private:
     bool parse_psh_format();
     bool parse_pop_instruction();
     bool parse_pop_format();
+    bool parse_bts_instruction();
+    bool parse_btc_instruction();
+    bool parse_btf_instruction();
 };
 
