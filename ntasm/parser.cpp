@@ -132,6 +132,7 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_SET: return tny_word{u: TNY_OPCODE_SET};
         case T_LOD: return tny_word{u: TNY_OPCODE_LOD};
         case T_STR: return tny_word{u: TNY_OPCODE_STR};
+        case T_PSH: return tny_word{u: TNY_OPCODE_PSH};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -654,7 +655,8 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 bool Parser::parse_code_line() {
     bool matched_code_line = parse_set_instruction() ||
                              parse_lod_instruction() ||
-                             parse_str_instruction();
+                             parse_str_instruction() ||
+                             parse_psh_instruction();
     return matched_code_line;
 }
 
@@ -687,6 +689,39 @@ bool Parser::parse_str_instruction() {
             && match(T_RBRACKET) && match(T_COMMA) && match(T_REGISTER, &p_reg2)) {
                 push_binary_instruction();
                 return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_psh_format() {
+    if(match(T_LBRACKET) && match(T_REGISTER, &p_reg1) && match(T_RBRACKET) && match(T_COMMA)
+      && parse_register_and_immediate(&p_reg2, &p_immed)) {
+        return true;
+    }
+    
+    /* The stack pointer is the default register for psh */
+    p_reg1.u = TNY_REG_SP;
+
+    if(match(T_REGISTER, &p_reg2)) {
+        p_immed.s = 0;
+        return true; 
+    }
+
+    if(parse_immediate(&p_immed)) {
+        p_reg2.u = TNY_REG_ZERO;
+        return true; 
+    }
+
+    return false;
+}
+
+bool Parser::parse_psh_instruction() {
+    if(match(T_PSH, &p_opcode)) {
+        if(parse_psh_format()) {
+            push_binary_instruction();
+            return true;
         }
         skip_line();
     }

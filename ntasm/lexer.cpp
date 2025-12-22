@@ -58,6 +58,7 @@ void Lexer::init_rules() {
     rules.push_back({ std::regex("^set\\b", std::regex_constants::icase), T_SET });
     rules.push_back({ std::regex("^lod\\b", std::regex_constants::icase), T_LOD });
     rules.push_back({ std::regex("^str\\b", std::regex_constants::icase), T_STR });
+    rules.push_back({ std::regex("^psh\\b", std::regex_constants::icase), T_PSH });
     rules.push_back({ std::regex("^add\\b", std::regex_constants::icase), T_ADD });
 
     // Hexadecimal number
