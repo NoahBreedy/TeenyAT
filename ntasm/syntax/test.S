@@ -1,7 +1,7 @@
 @ifndef MY_MACRO
 @define MY_MACRO
 
-@include "test.S"
+@include "syntax/test.S"
 
 !test_label
     set Ra, 0

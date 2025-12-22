@@ -4,11 +4,11 @@
 ; I basically want this to be able to assemble normal tnasm asm files
 
 
-@include "test.S"
+@include "syntax/test.S"
 
 jmp !main
 
-.var my_var 0
+.var my_var [12]
 
 .raw !main 10 20 30 40
 
