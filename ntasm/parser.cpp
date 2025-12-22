@@ -171,6 +171,9 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_SHF: return tny_word{u: TNY_OPCODE_SHF};
         case T_SHL: return tny_word{u: TNY_OPCODE_SHF};
         case T_SHR: return tny_word{u: TNY_OPCODE_SHF};
+        case T_ROT: return tny_word{u: TNY_OPCODE_ROT};
+        case T_ROL: return tny_word{u: TNY_OPCODE_ROT};
+        case T_ROR: return tny_word{u: TNY_OPCODE_ROT};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -791,7 +794,10 @@ bool Parser::parse_code_line() {
                              parse_xor_instruction() ||
                              parse_shf_instruction() ||
                              parse_shl_instruction() ||
-                             parse_shr_instruction();
+                             parse_shr_instruction() ||
+                             parse_rot_instruction() ||
+                             parse_rol_instruction() ||
+                             parse_ror_instruction();
 
     return matched_code_line;
 }
@@ -1060,3 +1066,45 @@ bool Parser::parse_shr_instruction() {
     }
     return false;
 }
+
+bool Parser::parse_rot_instruction() {
+    if(match(T_ROT, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_rol_instruction() {
+    if(match(T_ROL, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_immediate(&p_immed)) {
+                /* negate the value */
+                p_immed.s *= -1;
+                p_reg2.u = TNY_REG_ZERO;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_ror_instruction() {
+    if(match(T_ROR, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_immediate(&p_immed)) {
+                p_reg2.u = TNY_REG_ZERO;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+
+
+
+
