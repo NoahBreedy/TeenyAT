@@ -84,7 +84,7 @@
 
 <lod_instruction> ::= T_LOD T_REGISTER T_COMMA T_LBRACKET <register_and_immediate> T_RBRACKET
 
-<str_instruction> ::= T_SET T_LBRACKET <register_and_immediate> T_RBRACKET T_COMMA T_REGISTER
+<str_instruction> ::= T_STR T_LBRACKET <register_and_immediate> T_RBRACKET T_COMMA T_REGISTER
 
 <psh_instruction> ::= T_PSH <psh_format>
 <psh_format>      ::= T_LBRACKET T_REGISTER T_RBRACKET T_COMMA <register_and_immediate>
