@@ -131,6 +131,7 @@ tny_word Parser::token_to_opcode(token_type t) {
     switch(t) {
         case T_SET: return tny_word{u: TNY_OPCODE_SET};
         case T_LOD: return tny_word{u: TNY_OPCODE_LOD};
+        case T_STR: return tny_word{u: TNY_OPCODE_STR};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -652,7 +653,8 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
 
 bool Parser::parse_code_line() {
     bool matched_code_line = parse_set_instruction() ||
-                             parse_lod_instruction();
+                             parse_lod_instruction() ||
+                             parse_str_instruction();
     return matched_code_line;
 }
 
@@ -671,6 +673,18 @@ bool Parser::parse_lod_instruction() {
     if(match(T_LOD, &p_opcode)) {
         if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && match(T_LBRACKET)
         && parse_register_and_immediate(&p_reg2, &p_immed) && match(T_RBRACKET)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_str_instruction() {
+    if(match(T_STR, &p_opcode)) {
+        if(match(T_LBRACKET) && parse_register_and_immediate(&p_reg1, &p_immed)
+            && match(T_RBRACKET) && match(T_COMMA) && match(T_REGISTER, &p_reg2)) {
                 push_binary_instruction();
                 return true;
         }
