@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 #include "lexer.h"
 #include "token.h"

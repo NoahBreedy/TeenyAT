@@ -34,6 +34,9 @@ token Preprocessor::next_token() {
         /* EOF of current lexer --> pop and continue */
         if (tok.type == T_EOL && tok.token_str.empty()) {
             lexers.pop();
+            if(!lexers.empty()) { 
+                oss << "---------- " << "EOF" << " -----------\n";
+            }
             continue;
         }
 
@@ -165,7 +168,7 @@ void Preprocessor::handle_endif(const token& directive) {
 
 void Preprocessor::handle_include() {
     token path = current_lexer().next_token();
-
+    oss << "------ @include " << path.token_str << " ------\n";
     std::string line = token_line_str(current_lexer().src,path);
     if (path.type != T_STRING) {
         valid_program = log_error(path, ltrim(line) + "\t@include requires string literal");
