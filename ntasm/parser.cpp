@@ -256,6 +256,11 @@ void Parser::setup_program() {
         labels[elm.first].instances = 0;
     }
 
+    /* reset instance count for vars/constants */
+    for (const auto& elm : consts_and_vars) {
+        consts_and_vars[elm.first].instances = 0;
+    }
+
     reset_lexer();
 }
 
@@ -294,6 +299,7 @@ void Parser::parse_line() {
 
 bool Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
+                             parse_constant_line() ||
                              parse_code_line();
 
     return matched_statement;
@@ -313,7 +319,7 @@ bool Parser::parse_label_line() {
     }else {
         labels[label_name].instances++;
         tny_uword line_num = labels[label_name].line_num;
-        if(labels[label_name].instances >= 2) {
+        if(labels[label_name].instances > 1) {
             std::string line = token_line_str(pp, label);
             valid_program    =  log_error(label, ltrim(line) +
                                 "\tduplicate label definition (defined on line " + std::to_string(line_num) + ")");
@@ -321,6 +327,46 @@ bool Parser::parse_label_line() {
     }
 
    return true;
+}
+
+bool Parser::parse_constant_line() {
+    if(!match(T_CONSTANT)) {
+        return false;
+    }
+
+    token constant_token = current;
+    std::string name = constant_token.token_str;
+    std::string line = token_line_str(pp, constant_token);
+
+    if(!match(T_IDENTIFIER)) {
+        valid_program = log_error(constant_token, ltrim(line) + "\tinvalid identifier \"" + name + "\"");
+        skip_line();
+        return false;
+    }
+    
+    tny_word value;
+    bool valid_immed = parse_immediate(&value);
+    if(!valid_immed) {
+        valid_program = log_error(constant_token, ltrim(line) + "\tinvalid constant value \"" + name + "\"");
+        skip_line();
+        return false;
+    }
+
+    if(!consts_and_vars.contains(name)) {
+        container obj = {value: value, instances: 1, line_num: (tny_uword)constant_token.line_num};
+        consts_and_vars.insert({ name, obj });
+    }else {
+        consts_and_vars[name].instances++;
+        tny_uword line_num = consts_and_vars[name].line_num;
+        if(consts_and_vars[name].instances > 1) {
+            std::string line = token_line_str(pp, constant_token);
+            valid_program    =  log_error(constant_token, ltrim(line) +
+                                "\tduplicate identifier definition (defined on line " + std::to_string(line_num) + ")");
+        }
+    }
+
+    return true;
+
 }
 
 bool Parser::parse_code_line() {

@@ -35,9 +35,10 @@ private:
         tny_word  value;
         tny_uword instances;
         tny_uword line_num;
-    } conainer;
+    } container;
 
-    std::unordered_map<std::string, conainer> labels;
+    std::unordered_map<std::string, container> labels;
+    std::unordered_map<std::string, container> consts_and_vars;
 
     /* Im making these teeny_words because I don't want the overload */
     tny_word p_opcode;
@@ -70,6 +71,7 @@ private:
     void parse_line();
     bool parse_statement();
     bool parse_label_line();
+    bool parse_constant_line();
     bool parse_code_line();
 
     bool parse_raw_value(tny_word* immed);

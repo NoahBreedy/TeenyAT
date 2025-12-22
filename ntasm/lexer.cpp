@@ -38,6 +38,9 @@ void Lexer::init_rules() {
 
     // Labels
     rules.push_back({ std::regex("^![A-Za-z_][A-Za-z0-9_]*"), T_LABEL });
+    
+    // Constants
+    rules.push_back({ std::regex("^\\.const(ant)?", std::regex_constants::icase), T_CONSTANT });
 
     // Named registers (pc, sp, rz)
     rules.push_back({ std::regex("^pc|sp|rz", std::regex_constants::icase), T_REGISTER });
