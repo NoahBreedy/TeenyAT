@@ -133,6 +133,7 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_LOD: return tny_word{u: TNY_OPCODE_LOD};
         case T_STR: return tny_word{u: TNY_OPCODE_STR};
         case T_PSH: return tny_word{u: TNY_OPCODE_PSH};
+        case T_POP: return tny_word{u: TNY_OPCODE_POP};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -656,7 +657,8 @@ bool Parser::parse_code_line() {
     bool matched_code_line = parse_set_instruction() ||
                              parse_lod_instruction() ||
                              parse_str_instruction() ||
-                             parse_psh_instruction();
+                             parse_psh_instruction() ||
+                             parse_pop_instruction();
     return matched_code_line;
 }
 
@@ -720,6 +722,34 @@ bool Parser::parse_psh_format() {
 bool Parser::parse_psh_instruction() {
     if(match(T_PSH, &p_opcode)) {
         if(parse_psh_format()) {
+            push_binary_instruction();
+            return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_pop_format() {
+    /* pop will always have zeroes in the immed section */
+    p_immed.s = 0;
+
+    if(current.type == T_EOL) {
+        /* pop uses the SP by default */
+        p_reg2.u = TNY_REG_SP;
+        return true;
+    }
+    
+    if(match(T_COMMA) && match(T_LBRACKET) && match(T_REGISTER, &p_reg2) && match(T_RBRACKET)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool Parser::parse_pop_instruction() {
+    if(match(T_POP, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && parse_pop_format()) {
             push_binary_instruction();
             return true;
         }
