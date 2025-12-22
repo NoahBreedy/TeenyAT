@@ -120,6 +120,8 @@ private:
     bool parse_or_instruction();
     bool parse_xor_instruction();
     bool parse_shf_instruction();
+    bool parse_shl_instruction();
+    bool parse_shr_instruction();
 
 };
 
