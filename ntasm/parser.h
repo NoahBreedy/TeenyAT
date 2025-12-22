@@ -53,6 +53,7 @@ private:
     void trace_parser(bool print_new_line);
 
     void push_binary_instruction();
+    void push_binary_value(tny_word value);
     void setup_program();
 
     void reset_lexer();
@@ -75,6 +76,8 @@ private:
     bool parse_label_line();
     bool parse_constant_line();
     bool parse_code_line();
+    bool parse_variable_format();
+    bool parse_variable_line();
 
     bool parse_raw_value(tny_word* immed);
     bool parse_immediate(tny_word* immed);

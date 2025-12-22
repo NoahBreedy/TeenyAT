@@ -13,6 +13,7 @@
 
 <statement_body> ::= <label_line>
                    | <constant_line>
+                   | <variable_line>
                    | <code_line>
 
 <pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> T_EOL
@@ -60,6 +61,11 @@
                       | ε
 
 <constant_line> ::= T_CONSTANT T_IDENTIFIER <immediate>
+
+<variable_line> ::= T_VARIABLE T_IDENTIFIER <variable_format>
+
+<variable_format> ::= T_LBRACKET <no_sign_immediate> T_RBRACKET
+                    | <immediate>*
 
 <code_line> ::= <set_instruction>
 
