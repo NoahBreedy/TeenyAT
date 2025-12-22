@@ -288,18 +288,19 @@ void Parser::parse_line() {
         return;
     }
 
+    token saved = current;
     bool matched = parse_statement();
 
     if(!matched) {
-        std::string line = token_line_str(pp,current);
-        valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
+        std::string line = token_line_str(pp,saved);
+        valid_program = log_error(saved, ltrim(line) + "\tinvalid syntax!");
     }
 
     bool valid_statement = expect(T_EOL);
 
     if(!valid_statement && matched) {
-        std::string line = token_line_str(pp,current);
-        valid_program = log_error(current, ltrim(line) + "\tinvalid syntax!");
+        std::string line = token_line_str(pp,saved);
+        valid_program = log_error(saved, ltrim(line) + "\tinvalid syntax!");
     }
 }
 
