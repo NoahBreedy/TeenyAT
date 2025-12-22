@@ -93,6 +93,7 @@
               | <rot_instruction>
               | <rol_instruction>
               | <ror_instruction>
+              | <neg_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -131,3 +132,6 @@
 <rot_instruction> ::= T_ROT T_REGISTER T_COMMA <register_and_immediate>
 <rol_instruction> ::= T_ROL T_REGISTER T_COMMA <immediate>
 <ror_instruction> ::= T_ROR T_REGISTER T_COMMA <immediate>
+
+<neg_instruction> ::= T_NEG T_REGISTER
+
