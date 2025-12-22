@@ -5,7 +5,7 @@
 #include "errorlog.h"
 
 Parser::Parser(Preprocessor& p, bool debug)
-    : pp(p), current(T_EOL, "", 0) {
+    : pp(p), current(T_EOL, "", 0), previous(T_EOL, "", 0) {
 
     address.u = 0;
     label_resolutions = 0;
@@ -19,6 +19,12 @@ Parser::Parser(Preprocessor& p, bool debug)
     p_condition_flags.u = 0;
     jump_inst = false;
     error_log = "";
+    warning_log = "";
+    binary_listing = "";
+    max_lines = 2;
+    oss << "";
+    raw_line_index = 0;
+    is_raw_line = false;
 }
 
 void Parser::reset_lexer() {
@@ -35,6 +41,7 @@ void Parser::skip_line() {
 }
 
 void Parser::advance() {
+    previous = current;
     current = pp.next_token();
 }
 
@@ -48,6 +55,14 @@ void Parser::trace_parser(bool print_new_line) {
             trace_log += tstr[current.type] + "( " + s + " ) ";
         }
     }
+}
+
+void Parser::collect_raw_listing(int index, tny_word value) {
+    if(!(index % 2) && index != 0) {
+        oss << "]\n";
+        oss << std::setw(10 + max_lines) << ": " <<  "[ ";
+    }
+    oss << word_to_hex(value) << " ";
 }
 
 /* just see if it fits into 4 bits */
@@ -81,6 +96,12 @@ void Parser::push_binary_instruction() {
        bin_word_0.instruction.teeny  = 1;
     }
 
+    /* print listing before address increment */
+    std::string line = token_line_str(pp, previous);
+
+    oss << "0x" << word_to_hex(address) << "  " << std::setw(max_lines) << current.line_num << ": [ ";
+    oss << word_to_hex(bin_word_0) << " ";
+
     bin_words.push_back(bin_word_0);
     address.u++;
 
@@ -89,11 +110,12 @@ void Parser::push_binary_instruction() {
         address.u++;
     }
 
-    std::cout << bin_word_0.instruction.opcode << " " << bin_word_0.instruction.teeny << " " << bin_word_0.instruction.reg1 << " " << bin_word_0.instruction.reg2 << " " << bin_word_0.instruction.immed4;
     if(!teeny) {
-        std::cout << '\n' << bin_word_1.s;
+        oss << word_to_hex(bin_word_1) + " ]  ";
+    }else{
+        oss << "     ]  ";
     }
-    std::cout << '\n';
+    oss << line << '\n';
 
 }
 
@@ -161,6 +183,10 @@ tny_word Parser::process_packed_string(std::string s) {
 
     std::string val = " ";
     tny_word string_value;
+    tny_uword index = 0;
+    if(is_raw_line) {
+        index = raw_line_index;
+    }
     for(size_t i = 1; i < s.size() - 1; i++) {
         string_value.u = 0;
         val = " ";  // the space is important
@@ -189,6 +215,9 @@ tny_word Parser::process_packed_string(std::string s) {
             string_value.bytes.byte1 =  bin1.u;
         }
 
+        collect_raw_listing(index, string_value);
+        index++;
+
         push_binary_value(string_value);
     }
 
@@ -196,7 +225,14 @@ tny_word Parser::process_packed_string(std::string s) {
     if(string_value.bytes.byte1 != 0) {
         tny_word zero;
         zero.u = 0;
+        collect_raw_listing(index, zero);
+        index++;
+
         push_binary_value(zero);
+    }
+    string_length = index;
+    if(is_raw_line) {
+        raw_line_index = index;
     }
 
     return return_val;
@@ -208,6 +244,10 @@ tny_word Parser::process_string(std::string s) {
 
     std::string val = " ";
     tny_word bin;
+    tny_uword index = 0;
+    if(is_raw_line) {
+        index = raw_line_index;
+    }
     for(size_t i = 1; i < s.size() - 1; i++) {
         val = " ";  // the space is important
         if(s[i] == '\\') {
@@ -218,6 +258,10 @@ tny_word Parser::process_string(std::string s) {
            val += s[i];
         }
         bin = process_character(val);
+
+        collect_raw_listing(index, bin);
+        index++;
+
         push_binary_value(bin);
     }
 
@@ -225,7 +269,16 @@ tny_word Parser::process_string(std::string s) {
     if(bin.u != 0) {
         tny_word zero;
         zero.u = 0;
+        collect_raw_listing(index, zero);
+        index++;
+
         push_binary_value(zero);
+    }
+
+    string_length = index;
+
+    if(is_raw_line) {
+        raw_line_index = index;
     }
 
     return return_val;
@@ -356,9 +409,14 @@ void Parser::setup_program() {
     valid_program = true;
     running_error_log = "";
     running_warning_log = "";
+    oss.str("");
     address.u = 0;
+    raw_line_index = 0;
+    is_raw_line = false;
     jump_inst = false;
     trace_log         = "";
+    warning_log         = "";
+    binary_listing = "";
     /* clear all binary words */
     bin_words.clear();
     label_resolutions++;
@@ -374,7 +432,6 @@ void Parser::setup_program() {
     }
 
     reset_lexer();
-    std::cout << "\nSTEP " << label_resolutions << std::endl;
 }
 
 bool Parser::parse_program() {
@@ -385,8 +442,10 @@ bool Parser::parse_program() {
         trace_parser(true);
     }
 
-    error_log   =  running_error_log; // let our error_log match the running one
-    warning_log =  running_warning_log; // let our warning_log match the running one
+    error_log      =  running_error_log;      // let our error_log match the running one
+    warning_log    =  running_warning_log;    // let our warning_log match the running one
+    binary_listing =  oss.str();  // match our binary listing to the running one
+    max_lines = std::to_string(previous.line_num).size(); // get total amount of maximum lines
 
     return (valid_program && pp.valid_program);
 }
@@ -409,6 +468,7 @@ void Parser::parse_line() {
     if(!valid_statement && matched) {
         std::string line = token_line_str(pp,saved);
         valid_program = log_error(saved, ltrim(line) + "\tinvalid syntax!");
+        skip_line();
     }
 }
 
@@ -430,6 +490,11 @@ bool Parser::parse_label_line() {
     }
 
     std::string label_name = label.token_str;
+
+    /* create listing entry */
+    std::string line = token_line_str(pp, label);
+    oss << "        " << std::setw(max_lines) << current.line_num << ": [           ]  " << line << "\n";
+
     if(!labels.contains(label_name)) {
         container obj = {value: address, instances: 1, line_num: (tny_uword)label.line_num, file_name: label.source_file};
         labels.insert({ label_name, obj });
@@ -455,6 +520,9 @@ bool Parser::parse_constant_line() {
     token constant_token = current;
     std::string name = constant_token.token_str;
     std::string line = token_line_str(pp, constant_token);
+
+    /* create listing entry */
+    oss << "        " << std::setw(max_lines) << current.line_num << ": [           ]  " << line << "\n";
 
     if(!match(T_IDENTIFIER)) {
         valid_program = log_error(constant_token, ltrim(line) + "\tinvalid identifier \"" + name + "\"");
@@ -493,8 +561,14 @@ bool Parser::parse_variable_format() {
     tny_word zero;
     zero.s = 0;
 
+    std::string line = token_line_str(pp, current);
+    oss << "0x" << word_to_hex(address) << "  " << std::setw(max_lines) << current.line_num << ": [ ";
+
     /* if nothing push zero */
     if(current.type == T_EOL) {
+        /* create listing entry */
+        oss << word_to_hex(zero) << std::setw(9) << " ]  " << line << "\n";
+
         push_binary_value(zero);
         return true;
     }
@@ -502,19 +576,30 @@ bool Parser::parse_variable_format() {
     /* This means we are going to push zeros into memeory X times */
     if(match(T_LBRACKET) && parse_no_sign_immediate(&value) && match(T_RBRACKET)) {
          for(int i = 0; i < value.u; i++) {
+            collect_raw_listing(i, zero);
             push_binary_value(zero);
          }
+         tny_uword pad = value.u % 2 ? 8 : 0;
+         oss << std::setw(pad) << "]  " << line << "\n";
          return true;
     }
 
     if(match(T_STRING, &value) || match(T_PACKED_STRING, &value)) {
+        tny_uword pad = string_length % 2 ? 8 : 0;
+        oss << std::setw(pad) << "]  " << line << "\n";
         return true;
     }
 
     /* loop through our immediates */
+    tny_uword i = 0;
     while(parse_immediate(&value)) {
+        collect_raw_listing(i, value);
+        i++;
         push_binary_value(value);
     }
+
+    tny_uword pad = i % 2 ? 8 : 0;
+    oss << std::setw(pad) << "]  " << line << "\n";
 
     return current.type == T_EOL;
 
@@ -575,6 +660,9 @@ bool Parser::parse_raw_line_value() {
     }
 
     if(parse_immediate(&value)) {
+        collect_raw_listing(raw_line_index,value);
+        raw_line_index++;
+
         push_binary_value(value);
         return true;
     }
@@ -586,21 +674,30 @@ bool Parser::parse_raw_line() {
     if(!match(T_RAW)) {
         return false;
     }
+    is_raw_line = true;
 
     if(address.u == 0) {
         log_warning(current, "Data at address 0x0000 is unsafe. It will be executed as code.");
     }
 
+    raw_line_index = 0;
     token t = current;
+    oss << "0x" << word_to_hex(address) << "  " << std::setw(max_lines) << current.line_num << ": [ ";
     while(parse_raw_line_value()) {
         t = current;
     }
 
+    std::string line = token_line_str(pp,current);
+
+    tny_uword pad = raw_line_index % 2 ? 8 : 0;
+    oss << std::setw(pad) << "]  " << line << "\n";
+
     if(current.type != T_EOL) {
-        std::string line = token_line_str(pp,current);
         valid_program = log_error(current, ltrim(line) + "\t invalid raw line value \"" + t.token_str + "\"");
         skip_line();
     }
+
+    is_raw_line = false;
 
     return true;
 }
@@ -706,18 +803,18 @@ bool Parser::parse_psh_format() {
       && parse_register_and_immediate(&p_reg2, &p_immed)) {
         return true;
     }
-    
+
     /* The stack pointer is the default register for psh */
     p_reg1.u = TNY_REG_SP;
 
     if(match(T_REGISTER, &p_reg2)) {
         p_immed.s = 0;
-        return true; 
+        return true;
     }
 
     if(parse_immediate(&p_immed)) {
         p_reg2.u = TNY_REG_ZERO;
-        return true; 
+        return true;
     }
 
     return false;
@@ -743,7 +840,7 @@ bool Parser::parse_pop_format() {
         p_reg2.u = TNY_REG_SP;
         return true;
     }
-    
+
     if(match(T_COMMA) && match(T_LBRACKET) && match(T_REGISTER, &p_reg2) && match(T_RBRACKET)) {
         return true;
     }

@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
     Lexer* lexer = new Lexer(asm_lines, asm_filename.string());
     Preprocessor preprocessor(lexer);
-    Parser parser(preprocessor, true);
+    Parser parser(preprocessor, false);
     
     /* First pass identify labels/identifiers */
     parser.parse_program();
@@ -53,9 +53,10 @@ int main(int argc, char** argv) {
     }
 
     if(valid_program) {
-        for(auto t : parser.bin_words) {
+        /*for(auto t : parser.bin_words) {
             std::cout << std::hex << t.u << std::endl;
-        }
+        }*/
+        std::cout << parser.binary_listing << std::endl;
         if(parser.warning_log != "") {
             std::cout << "------------------------------------" << std::endl; 
             std::cout << parser.warning_log << std::endl; 

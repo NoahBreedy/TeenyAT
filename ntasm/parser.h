@@ -14,6 +14,8 @@ public:
     bool parse_program();
 
     std::vector<tny_word> bin_words;
+
+    std::string binary_listing;
     std::string error_log;
     std::string trace_log;
     std::string warning_log;
@@ -23,6 +25,7 @@ public:
 private:
     Preprocessor& pp;
     token current;
+    token previous;
 
     bool valid_program;
 
@@ -31,6 +34,10 @@ private:
 
     tny_word address;
     tny_uword label_resolutions;
+    tny_uword max_lines;
+    tny_uword string_length;
+    tny_uword raw_line_index;
+    bool is_raw_line;
 
     typedef struct container {
         tny_word  value;
@@ -53,6 +60,7 @@ private:
     bool     jump_inst;
 
     void trace_parser(bool print_new_line);
+    void collect_raw_listing(int index, tny_word value);
 
     void push_binary_instruction();
     void push_binary_value(tny_word value);
