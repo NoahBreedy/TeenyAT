@@ -56,10 +56,14 @@ int main(int argc, char** argv) {
         for(auto t : parser.bin_words) {
             std::cout << std::hex << t.u << std::endl;
         }
-        std::cout << "Parse completed successfully.\n";
+        if(parser.warning_log != "") {
+            std::cout << "------------------------------------" << std::endl; 
+            std::cout << parser.warning_log << std::endl; 
+        }
     }else {
         std::cerr << parser.error_log << std::endl;
         std::cout << "There were errors. No binary output.\n";
+        return 1;
     }
 
     return 0;
