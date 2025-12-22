@@ -35,6 +35,7 @@ private:
         tny_word  value;
         tny_uword instances;
         tny_uword line_num;
+        std::string file_name;
     } container;
 
     std::unordered_map<std::string, container> labels;

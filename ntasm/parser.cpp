@@ -338,15 +338,16 @@ bool Parser::parse_label_line() {
 
     std::string label_name = label.token_str;
     if(!labels.contains(label_name)) {
-        container obj = {value: address, instances: 1, line_num: (tny_uword)label.line_num};
+        container obj = {value: address, instances: 1, line_num: (tny_uword)label.line_num, file_name: label.source_file};
         labels.insert({ label_name, obj });
     }else {
         labels[label_name].instances++;
         tny_uword line_num = labels[label_name].line_num;
+        std::string file_name = labels[label_name].file_name;
         if(labels[label_name].instances > 1) {
             std::string line = token_line_str(pp, label);
             valid_program    =  log_error(label, ltrim(line) +
-                                "\tduplicate label definition (defined on line " + std::to_string(line_num) + ")");
+                                "\tduplicate label definition (defined in " + file_name +" on line " + std::to_string(line_num) + ")");
         }
     }
 
@@ -377,15 +378,16 @@ bool Parser::parse_constant_line() {
     }
 
     if(!consts_and_vars.contains(name)) {
-        container obj = {value: value, instances: 1, line_num: (tny_uword)constant_token.line_num};
+        container obj = {value: value, instances: 1, line_num: (tny_uword)constant_token.line_num, file_name:constant_token.source_file};
         consts_and_vars.insert({ name, obj });
     }else {
         consts_and_vars[name].instances++;
         tny_uword line_num = consts_and_vars[name].line_num;
+        std::string file_name = consts_and_vars[name].file_name;
         if(consts_and_vars[name].instances > 1) {
             std::string line = token_line_str(pp, constant_token);
             valid_program    =  log_error(constant_token, ltrim(line) +
-                                "\tduplicate identifier \"" + name + "\" (defined on line " + std::to_string(line_num) + ")");
+                                "\tduplicate identifier \"" + name + "\" (defined in " + file_name + " on line " + std::to_string(line_num) + ")");
         }
     }
 
