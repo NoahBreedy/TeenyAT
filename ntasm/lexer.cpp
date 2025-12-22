@@ -89,15 +89,11 @@ void Lexer::init_rules() {
     rules.push_back({ std::regex("^[A-Za-z_][A-Za-z0-9_]*"), T_IDENTIFIER });
 }
 
-bool Lexer::match_rule(const regex_rule& rule, token& out) {
+bool Lexer::match_rule(const regex_rule& rule, std::cmatch& match_out) {
     std::cmatch match;
     const char* start = src.c_str() + pos;
 
-    if (std::regex_search(start, match, rule.pattern) && match.position() == 0) {
-        std::string lexeme = match.str();
-        out = token(rule.type, lexeme, line);
-        out.source_file = source_file;
-        pos += lexeme.size();
+    if (std::regex_search(start, match_out, rule.pattern, std::regex_constants::match_continuous)) {
         return true;
     }
     return false;
@@ -108,21 +104,19 @@ token Lexer::next_token() {
         return token(T_EOL, "", line);
     }
 
-    token tok(T_BAD, "", line);
-    tok.source_file = source_file;
+    const regex_rule* best_rule = nullptr;
+    std::cmatch best_match;
+    size_t best_len = 0;
 
     for (const auto& rule : rules) {
-        if (match_rule(rule, tok)) {
-
-            if (tok.type == T_IGNORE) {
-                return next_token();
+        std::cmatch m;
+        if (match_rule(rule, m)) {
+            size_t len = m.length();
+            if(len > best_len) {
+                best_len = len;
+                best_match = m;
+                best_rule = &rule;                
             }
-
-            if (tok.type == T_EOL) {
-                line++;
-            }
-
-            return tok;
         }
     }
 
@@ -132,10 +126,29 @@ token Lexer::next_token() {
      *
      * Also probably should have put the source_file into the constructor
      */
-    char bad = src[pos++];
-    token bad_tok = token(T_BAD, std::string(1, bad), line);
-    bad_tok.source_file = source_file;
-    return bad_tok;
+    if (!best_rule) {
+        char bad = src[pos++];
+        token bad_tok = token(T_BAD, std::string(1, bad), line);
+        bad_tok.source_file = source_file;
+        return bad_tok;
+    }
+
+    std::string lexeme = best_match.str();
+    pos += best_len;
+
+    token tok = token(best_rule->type, lexeme, line);
+    tok.source_file = source_file;
+
+    if (tok.type == T_EOL) {
+        line++;
+    }
+
+    if (tok.type == T_IGNORE) {
+        return next_token();
+    }
+
+    return tok;
+
 }
 
 token Lexer::peek_token() {
