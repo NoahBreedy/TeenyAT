@@ -76,6 +76,9 @@
               | <str_instruction>
               | <psh_instruction>
               | <pop_instruction>
+              | <bts_instruction>
+              | <btc_instruction>
+              | <btf_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -90,3 +93,7 @@
 
 <pop_instruction> ::= T_POP T_REGISTER <pop_format>?
 <pop_format>      ::= T_COMMA T_LBRACKET T_REGISTER T_RBRACKET
+
+<bts_instruction> ::= T_BTS T_REGISTER T_COMMA <register_and_immediate>
+<btc_instruction> ::= T_BTC T_REGISTER T_COMMA <register_and_immediate>
+<btf_instruction> ::= T_BTF T_REGISTER T_COMMA <register_and_immediate>

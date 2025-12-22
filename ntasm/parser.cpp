@@ -156,6 +156,9 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_STR: return tny_word{u: TNY_OPCODE_STR};
         case T_PSH: return tny_word{u: TNY_OPCODE_PSH};
         case T_POP: return tny_word{u: TNY_OPCODE_POP};
+        case T_BTS: return tny_word{u: TNY_OPCODE_BTS};
+        case T_BTC: return tny_word{u: TNY_OPCODE_BTC};
+        case T_BTF: return tny_word{u: TNY_OPCODE_BTF};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -761,7 +764,10 @@ bool Parser::parse_code_line() {
                              parse_lod_instruction() ||
                              parse_str_instruction() ||
                              parse_psh_instruction() ||
-                             parse_pop_instruction();
+                             parse_pop_instruction() ||
+                             parse_bts_instruction() ||
+                             parse_btc_instruction() ||
+                             parse_btf_instruction();
     return matched_code_line;
 }
 
@@ -854,6 +860,39 @@ bool Parser::parse_pop_instruction() {
         if(match(T_REGISTER, &p_reg1) && parse_pop_format()) {
             push_binary_instruction();
             return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_bts_instruction() {
+    if(match(T_BTS, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_btc_instruction() {
+    if(match(T_BTC, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_btf_instruction() {
+    if(match(T_BTF, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
         }
         skip_line();
     }
