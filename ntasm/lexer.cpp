@@ -45,6 +45,9 @@ void Lexer::init_rules() {
     // Variables
     rules.push_back({ std::regex("^\\.var(iable)?", std::regex_constants::icase), T_VARIABLE });
 
+    // Raw Line
+    rules.push_back({ std::regex("^\\.raw", std::regex_constants::icase), T_RAW });
+
     // Named registers (pc, sp, rz)
     rules.push_back({ std::regex("^pc|sp|rz", std::regex_constants::icase), T_REGISTER });
 
