@@ -70,6 +70,8 @@ private:
     tny_word process_character(std::string s);
     tny_word process_label(std::string s);
     tny_word process_identifier(std::string s);
+    tny_word process_string(std::string s);
+    tny_word process_packed_string(std::string s);
 
     void parse_line();
     bool parse_statement();
@@ -78,6 +80,8 @@ private:
     bool parse_code_line();
     bool parse_variable_format();
     bool parse_variable_line();
+    bool parse_raw_line();
+    bool parse_raw_line_value();
 
     bool parse_raw_value(tny_word* immed);
     bool parse_immediate(tny_word* immed);

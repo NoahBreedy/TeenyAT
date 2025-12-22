@@ -141,12 +141,88 @@ void Parser::set_destination(token token, tny_word* dest) {
         case T_LABEL:           *dest = process_label(token.token_str); break;
         case T_IDENTIFIER:      *dest = process_identifier(token.token_str); break;
         case T_CHARACTER:       *dest = process_character(token.token_str); break;
-        case T_STRING:          *dest = tny_word{u: 421}; break;
-        case T_PACKED_STRING:   *dest = tny_word{u: 422}; break;
+        case T_STRING:          *dest = process_string(token.token_str); break;
+        case T_PACKED_STRING:   *dest = process_packed_string(token.token_str); break;
         /* this means its an opcode */
         default: *dest = token_to_opcode(token.type); break;
    }
    return;
+}
+
+tny_word Parser::process_packed_string(std::string s) {
+    tny_word return_val;
+    return_val.u = address.u;
+
+    std::string val = " ";
+    tny_word string_value;
+    for(size_t i = 1; i < s.size() - 1; i++) {
+        string_value.u = 0;
+        val = " ";  // the space is important
+        if(s[i] == '\\') {
+           val += "\\";
+           val += s[i+1];
+           i += 1;
+        }else {
+           val += s[i];
+        }
+
+        tny_word bin0 = process_character(val);
+        string_value.bytes.byte0 =  bin0.u;
+        i += 1;
+
+        if(i < s.size()-1) {
+            val = " ";  // the space is important
+            if(s[i] == '\\') {
+                val += "\\";
+                val += s[i+1];
+                i += 1;
+            }else {
+                val += s[i];
+            }
+            tny_word bin1 = process_character(val);
+            string_value.bytes.byte1 =  bin1.u;
+        }
+
+        push_binary_value(string_value);
+    }
+    
+    /* null terminate the string */
+    if(string_value.bytes.byte1 != 0) {
+        tny_word zero;
+        zero.u = 0;
+        push_binary_value(zero);
+    }
+
+    return return_val;
+}
+
+tny_word Parser::process_string(std::string s) {
+    tny_word return_val;
+    return_val.u = address.u;
+
+    std::string val = " ";
+    tny_word bin;
+    for(size_t i = 1; i < s.size() - 1; i++) {
+        val = " ";  // the space is important
+        if(s[i] == '\\') {
+           val += "\\";
+           val += s[i+1];
+           i += 1;
+        }else {
+           val += s[i];
+        }
+        bin = process_character(val);
+        push_binary_value(bin);
+    }
+    
+    /* null terminate the string */
+    if(bin.u != 0) {
+        tny_word zero;
+        zero.u = 0;
+        push_binary_value(zero);
+    }
+
+    return return_val;
 }
 
 tny_word Parser::process_identifier(std::string s) {
@@ -331,6 +407,7 @@ bool Parser::parse_statement() {
     bool matched_statement = parse_label_line() ||
                              parse_constant_line() ||
                              parse_variable_line() ||
+                             parse_raw_line() ||
                              parse_code_line();
 
     return matched_statement;
@@ -375,7 +452,7 @@ bool Parser::parse_constant_line() {
         skip_line();
         return true;
     }
-    
+
     tny_word value;
     bool valid_immed = parse_immediate(&value);
     if(!valid_immed) {
@@ -406,7 +483,7 @@ bool Parser::parse_variable_format() {
     tny_word value;
     tny_word zero;
     zero.s = 0;
-    
+
     /* if nothing push zero */
     if(current.type == T_EOL) {
         push_binary_value(zero);
@@ -418,14 +495,14 @@ bool Parser::parse_variable_format() {
          for(int i = 0; i < value.u; i++) {
             push_binary_value(zero);
          }
-         return true; 
+         return true;
     }
 
     /* loop through our immediates */
     while(parse_immediate(&value)) {
         push_binary_value(value);
     }
-    
+
     return current.type == T_EOL;
 
 }
@@ -444,7 +521,7 @@ bool Parser::parse_variable_line() {
         skip_line();
         return false;
     }
-    
+
     /* save the starting address */
     tny_word base_address = address;
 
@@ -471,7 +548,40 @@ bool Parser::parse_variable_line() {
     }
 
     return true;
-    
+
+}
+
+bool Parser::parse_raw_line_value() {
+    tny_word value;
+    if(match(T_STRING, &value) || match(T_PACKED_STRING, &value)) {
+        return true;
+    }
+
+    if(parse_immediate(&value)) {
+        push_binary_value(value);
+        return true;
+    }
+
+    return false;
+}
+
+bool Parser::parse_raw_line() {
+    if(!match(T_RAW)) {
+        return false;
+    }
+
+    token t = current;
+    while(parse_raw_line_value()) {
+        t = current;
+    }
+
+    if(current.type != T_EOL) {
+        std::string line = token_line_str(pp,current);
+        valid_program = log_error(current, ltrim(line) + "\t invalid raw line value \"" + t.token_str + "\"");
+        skip_line();
+    }
+
+    return true;
 }
 
 bool Parser::parse_code_line() {

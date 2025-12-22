@@ -14,6 +14,7 @@
 <statement_body> ::= <label_line>
                    | <constant_line>
                    | <variable_line>
+                   | <raw_line>
                    | <code_line>
 
 <pp_directive> ::= T_AT_DIRECTIVE <pp_identifier> T_EOL
@@ -66,6 +67,12 @@
 
 <variable_format> ::= T_LBRACKET <no_sign_immediate> T_RBRACKET
                     | <immediate>*
+
+<raw_line> ::= T_RAW <raw_line_value>*
+
+<raw_line_value> ::= <immediate>
+                   | T_STRING
+                   | T_PACKED_STRING
 
 <code_line> ::= <set_instruction>
 
