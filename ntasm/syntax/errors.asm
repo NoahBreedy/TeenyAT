@@ -5,6 +5,7 @@
 @undef HELLO
 @include "me.S" "you.me"
 @include "me.S"
+@include "syntax/test.S"
 @ifdef MY_MACRO 0 0
 !test_label
 set rA, '\s'
