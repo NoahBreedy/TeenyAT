@@ -49,17 +49,12 @@
 <plus_or_minus> ::= T_PLUS
                   | T_MINUS
 
-<register_and_immediate> ::= T_REGISTER <includes_immediate>
-                           | <immediate> <includes_register>
+<register_and_immediate> ::= T_REGISTER <includes_immediate>?
+                           | <immediate> <includes_register>?
 
-;------
-; I put ε isntead of T_EOL since its already satisfied by <statement>
-;------
 <includes_immediate> ::= <plus_or_minus> <no_sign_immediate>
-                       | ε
 
 <includes_register> ::= T_PLUS T_REGISTER
-                      | ε
 
 <constant_line> ::= T_CONSTANT T_IDENTIFIER <immediate>
 
