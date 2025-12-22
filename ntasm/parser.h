@@ -93,5 +93,6 @@ private:
     bool parse_register_and_immediate(tny_word* reg, tny_word* immed);
 
     bool parse_set_instruction();
+    bool parse_lod_instruction();
 };
 
