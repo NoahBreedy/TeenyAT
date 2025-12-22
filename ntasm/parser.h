@@ -125,6 +125,7 @@ private:
     bool parse_rot_instruction();
     bool parse_rol_instruction();
     bool parse_ror_instruction();
+    bool parse_neg_instruction();
 
 };
 

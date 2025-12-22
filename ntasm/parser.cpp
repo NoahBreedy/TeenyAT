@@ -174,6 +174,7 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_ROT: return tny_word{u: TNY_OPCODE_ROT};
         case T_ROL: return tny_word{u: TNY_OPCODE_ROT};
         case T_ROR: return tny_word{u: TNY_OPCODE_ROT};
+        case T_NEG: return tny_word{u: TNY_OPCODE_MPY};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -797,7 +798,8 @@ bool Parser::parse_code_line() {
                              parse_shr_instruction() ||
                              parse_rot_instruction() ||
                              parse_rol_instruction() ||
-                             parse_ror_instruction();
+                             parse_ror_instruction() ||
+                             parse_neg_instruction();
 
     return matched_code_line;
 }
@@ -1104,6 +1106,19 @@ bool Parser::parse_ror_instruction() {
     return false;
 }
 
+bool Parser::parse_neg_instruction() {
+    if(match(T_NEG, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1)) {
+                /*  NEG rX == MPY rX, rZ - 1 */
+                p_reg2.u = TNY_REG_ZERO;
+                p_immed.s = -1;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
 
 
 
