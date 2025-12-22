@@ -43,6 +43,12 @@ token Preprocessor::next_token() {
             continue;
         }
 
+        if(tok.type == T_IDENTIFIER) {
+            if(macros.contains(tok.token_str)) {
+                tok = macros.at(tok.token_str);
+            }
+        }
+
         /* Skip tokens if in inactive blocks */
         if (!is_active()) {
             continue;
