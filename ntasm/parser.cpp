@@ -672,10 +672,10 @@ bool Parser::parse_set_instruction() {
                 return true;
             }
             skip_line();
-            return false;
+            return true;
         }
         skip_line();
-        return false;
+        return true;
     }
     return false;
 }
