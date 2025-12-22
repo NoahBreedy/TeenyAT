@@ -82,6 +82,12 @@ void Parser::push_binary_instruction() {
         address.u++;
     }
 
+    std::cout << bin_word_0.instruction.opcode << " " << bin_word_0.instruction.teeny << " " << bin_word_0.instruction.reg1 << " " << bin_word_0.instruction.reg2 << " " << bin_word_0.instruction.immed4;
+    if(!teeny) {
+        std::cout << bin_word_1.s;
+    }
+    std::cout << '\n';
+
 }
 
 bool Parser::match(token_type t) {
