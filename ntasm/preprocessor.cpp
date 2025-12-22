@@ -102,6 +102,7 @@ void Preprocessor::handle_define() {
         tok = current_lexer().peek_token();
         if(tok.type != T_EOL) {
             valid_program = log_error(tok, ltrim(line) + "\t@define can only reference one item!");
+            macros.erase(name.token_str);
         }
     }
     skip_line();
