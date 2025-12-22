@@ -65,6 +65,14 @@ void Lexer::init_rules() {
     rules.push_back({ std::regex("^btf\\b", std::regex_constants::icase), T_BTF });
     rules.push_back({ std::regex("^cal\\b", std::regex_constants::icase), T_CAL });
     rules.push_back({ std::regex("^add\\b", std::regex_constants::icase), T_ADD });
+    rules.push_back({ std::regex("^sub\\b", std::regex_constants::icase), T_SUB });
+    rules.push_back({ std::regex("^mpy\\b", std::regex_constants::icase), T_MPY });
+    rules.push_back({ std::regex("^div\\b", std::regex_constants::icase), T_DIV });
+    rules.push_back({ std::regex("^mod\\b", std::regex_constants::icase), T_MOD });
+    rules.push_back({ std::regex("^and\\b", std::regex_constants::icase), T_AND });
+    rules.push_back({ std::regex("^or\\b", std::regex_constants::icase),  T_OR });
+    rules.push_back({ std::regex("^xor\\b", std::regex_constants::icase), T_XOR });
+    rules.push_back({ std::regex("^shf\\b", std::regex_constants::icase), T_SHF });
 
     // Hexadecimal number
     rules.push_back({ std::regex("^0x(_*[0-9a-f]+)+", std::regex_constants::icase), T_NUMBER });

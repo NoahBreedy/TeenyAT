@@ -111,5 +111,15 @@ private:
     bool parse_btc_instruction();
     bool parse_btf_instruction();
     bool parse_cal_instruction();
+    bool parse_add_instruction();
+    bool parse_sub_instruction();
+    bool parse_mpy_instruction();
+    bool parse_div_instruction();
+    bool parse_mod_instruction();
+    bool parse_and_instruction();
+    bool parse_or_instruction();
+    bool parse_xor_instruction();
+    bool parse_shf_instruction();
+
 };
 
