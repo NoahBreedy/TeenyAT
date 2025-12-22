@@ -90,6 +90,9 @@
               | <xor_instruction>
               | <shf_instruction>
               | <shl_instruction>
+              | <rot_instruction>
+              | <rol_instruction>
+              | <ror_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -120,7 +123,11 @@
 <and_instruction> ::= T_AND T_REGISTER T_COMMA <register_and_immediate>
 <or_instruction>  ::= T_OR  T_REGISTER T_COMMA <register_and_immediate>
 <xor_instruction> ::= T_XOR T_REGISTER T_COMMA <register_and_immediate>
-<shf_instruction> ::= T_SHF T_REGISTER T_COMMA <register_and_immediate>
 
+<shf_instruction> ::= T_SHF T_REGISTER T_COMMA <register_and_immediate>
 <shl_instruction> ::= T_SHL T_REGISTER T_COMMA <immediate>
 <shr_instruction> ::= T_SHR T_REGISTER T_COMMA <immediate>
+
+<rot_instruction> ::= T_ROT T_REGISTER T_COMMA <register_and_immediate>
+<rol_instruction> ::= T_ROL T_REGISTER T_COMMA <immediate>
+<ror_instruction> ::= T_ROR T_REGISTER T_COMMA <immediate>

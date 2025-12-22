@@ -122,6 +122,9 @@ private:
     bool parse_shf_instruction();
     bool parse_shl_instruction();
     bool parse_shr_instruction();
+    bool parse_rot_instruction();
+    bool parse_rol_instruction();
+    bool parse_ror_instruction();
 
 };
 
