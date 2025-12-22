@@ -79,6 +79,7 @@
               | <bts_instruction>
               | <btc_instruction>
               | <btf_instruction>
+              | <cal_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -97,3 +98,6 @@
 <bts_instruction> ::= T_BTS T_REGISTER T_COMMA <register_and_immediate>
 <btc_instruction> ::= T_BTC T_REGISTER T_COMMA <register_and_immediate>
 <btf_instruction> ::= T_BTF T_REGISTER T_COMMA <register_and_immediate>
+
+; uses reg2
+<cal_instruction> ::= T_CAL <register_and_immediate>
