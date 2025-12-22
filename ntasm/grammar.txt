@@ -61,6 +61,8 @@
 <variable_line> ::= T_VARIABLE T_IDENTIFIER <variable_format>
 
 <variable_format> ::= T_LBRACKET <no_sign_immediate> T_RBRACKET
+                    | T_STRING
+                    | T_PACKED_STRING
                     | <immediate>*
 
 <raw_line> ::= T_RAW <raw_line_value>*

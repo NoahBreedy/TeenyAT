@@ -507,6 +507,10 @@ bool Parser::parse_variable_format() {
          return true;
     }
 
+    if(match(T_STRING, &value) || match(T_PACKED_STRING, &value)) {
+        return true;
+    }
+
     /* loop through our immediates */
     while(parse_immediate(&value)) {
         push_binary_value(value);
