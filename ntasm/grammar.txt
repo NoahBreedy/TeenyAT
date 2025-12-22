@@ -75,5 +75,7 @@
                    | T_PACKED_STRING
 
 <code_line> ::= <set_instruction>
+              | <lod_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
+<lod_instruction> ::= T_LOD T_REGISTER T_COMMA T_LBRACKET <register_and_immediate> T_RBRACKET

@@ -130,7 +130,8 @@ bool Parser::expect(token_type t) {
 tny_word Parser::token_to_opcode(token_type t) {
     switch(t) {
         case T_SET: return tny_word{u: TNY_OPCODE_SET};
-        default: std::cerr << "Fatal error unkownn opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
+        case T_LOD: return tny_word{u: TNY_OPCODE_LOD};
+        default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
 
@@ -187,7 +188,7 @@ tny_word Parser::process_packed_string(std::string s) {
 
         push_binary_value(string_value);
     }
-    
+
     /* null terminate the string */
     if(string_value.bytes.byte1 != 0) {
         tny_word zero;
@@ -216,7 +217,7 @@ tny_word Parser::process_string(std::string s) {
         bin = process_character(val);
         push_binary_value(bin);
     }
-    
+
     /* null terminate the string */
     if(bin.u != 0) {
         tny_word zero;
@@ -516,13 +517,13 @@ bool Parser::parse_variable_line() {
     if(!match(T_VARIABLE)) {
         return false;
     }
-    
+
     token variable_token = current;
     std::string name = variable_token.token_str;
     std::string line = token_line_str(pp, variable_token);
 
     if(address.u == 0) {
-        log_warning(current, "A variable at address 0x0000 is unsafe. It will be executed as code."); 
+        log_warning(current, "A variable at address 0x0000 is unsafe. It will be executed as code.");
     }
 
     if(!match(T_IDENTIFIER)) {
@@ -580,7 +581,7 @@ bool Parser::parse_raw_line() {
     }
 
     if(address.u == 0) {
-        log_warning(current, "Data at address 0x0000 is unsafe. It will be executed as code."); 
+        log_warning(current, "Data at address 0x0000 is unsafe. It will be executed as code.");
     }
 
     token t = current;
@@ -597,25 +598,9 @@ bool Parser::parse_raw_line() {
     return true;
 }
 
-bool Parser::parse_code_line() {
-    bool matched_code_line = parse_set_instruction();
-    return matched_code_line;
-}
-
 bool Parser::parse_raw_value(tny_word* immed) {
-    if(match(T_CHARACTER, immed)) {
-        return true;
-    }
-
-    if(match(T_IDENTIFIER, immed)) {
-        return true;
-    }
-
-    if(match(T_NUMBER, immed)) {
-        return true;
-    }
-
-    if(match(T_LABEL, immed)) {
+    if(match(T_CHARACTER, immed) || match(T_IDENTIFIER, immed) ||
+       match(T_NUMBER, immed)    || match(T_LABEL, immed)) {
         return true;
     }
 
@@ -640,15 +625,16 @@ bool Parser::parse_includes_immediate(tny_word* immed) {
     if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
         return parse_no_sign_immediate(immed);
     }
-
-    return immed->u = 0, current.type == T_EOL;
+    immed->u = 0;
+    return true;
 }
 
 bool Parser::parse_includes_register(tny_word* reg) {
     if(match(T_PLUS, &p_negative) && match(T_REGISTER, reg)) {
         return true;
     }
-    return reg->u = TNY_REG_ZERO, current.type == T_EOL;
+    reg->u = TNY_REG_ZERO;
+    return true;
 }
 
 bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
@@ -664,18 +650,31 @@ bool Parser::parse_register_and_immediate(tny_word* reg, tny_word* immed) {
    return false;
 }
 
+bool Parser::parse_code_line() {
+    bool matched_code_line = parse_set_instruction() ||
+                             parse_lod_instruction();
+    return matched_code_line;
+}
+
 bool Parser::parse_set_instruction() {
     if(match(T_SET, &p_opcode)) {
-        if(match(T_REGISTER, &p_reg1) && match(T_COMMA)) {
-            if(parse_register_and_immediate(&p_reg2, &p_immed)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
                 push_binary_instruction();
                 return true;
-            }
-            skip_line();
-            return true;
         }
         skip_line();
-        return true;
+    }
+    return false;
+}
+
+bool Parser::parse_lod_instruction() {
+    if(match(T_LOD, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && match(T_LBRACKET)
+        && parse_register_and_immediate(&p_reg2, &p_immed) && match(T_RBRACKET)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
     }
     return false;
 }
