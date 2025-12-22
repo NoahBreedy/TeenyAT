@@ -15,4 +15,6 @@ set rA, '\s'
 .const yo 10
 .const yo 11
 set rA, hell
+.var hello2 -1 -4
+.var hello2 [0]
 
