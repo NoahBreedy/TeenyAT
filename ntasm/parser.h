@@ -97,5 +97,7 @@ private:
     bool parse_str_instruction();
     bool parse_psh_instruction();
     bool parse_psh_format();
+    bool parse_pop_instruction();
+    bool parse_pop_format();
 };
 

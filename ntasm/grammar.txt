@@ -78,6 +78,7 @@
               | <lod_instruction>
               | <str_instruction>
               | <psh_instruction>
+              | <pop_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -89,3 +90,7 @@
 <psh_format>      ::= T_LBRACKET T_REGISTER T_RBRACKET T_COMMA <register_and_immediate>
                     | T_REGISTER
                     | <immediate>
+
+<pop_instruction> ::= T_POP T_REGISTER <pop_format>?
+<pop_format>      ::= T_COMMA T_LBRACKET T_REGISTER T_RBRACKET
+
