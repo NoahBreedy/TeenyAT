@@ -13,6 +13,7 @@ jmp !main
 .var my_var [12]
 .var second_var -10
 .var third_var
+.var var_4 "Hello World\n"
 
 .raw !main 10 0b_0_110_1 30 -!test_label 0xBEEF 0o3745
 
@@ -21,4 +22,5 @@ jmp !main
     set r5, -!main
     set rd, rZ + !main
     set rb, -MY_CONST + rA
+    set r4, var_4
     jmp !main ; coolio
