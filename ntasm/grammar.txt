@@ -89,6 +89,7 @@
               | <or_instruction>
               | <xor_instruction>
               | <shf_instruction>
+              | <shl_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -121,4 +122,5 @@
 <xor_instruction> ::= T_XOR T_REGISTER T_COMMA <register_and_immediate>
 <shf_instruction> ::= T_SHF T_REGISTER T_COMMA <register_and_immediate>
 
-
+<shl_instruction> ::= T_SHL T_REGISTER T_COMMA <immediate>
+<shr_instruction> ::= T_SHR T_REGISTER T_COMMA <immediate>
