@@ -10,6 +10,9 @@
 #include "lexer.h"
 #include "token.h"
 
+// how many times you can @include the same file till error
+#define INCLUDE_THRESHOLD 10
+
 class Preprocessor {
 public:
     explicit Preprocessor(Lexer* root);
@@ -29,6 +32,7 @@ private:
 
     /* Dictionary to hold our macros */
     std::unordered_map<std::string, token> macros;
+    std::unordered_map<std::string, int>   opened_files;
 
     /**
      * Conditional compilation stack
