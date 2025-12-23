@@ -1142,14 +1142,14 @@ bool Parser::parse_dly_register_format() {
     if(match(T_COMMA)) {
         return parse_register_and_immediate(&p_reg2, &p_immed);
     }
-    
+
     /* we need to swap reg1 and reg2 */
     p_reg2.u = p_reg1.u;
     p_reg1.u = TNY_REG_ZERO;
     if(parse_immediate(&p_immed)) {
-        return true; 
+        return true;
     }
-    
+
     return current.type == T_EOL;
 }
 
@@ -1160,7 +1160,7 @@ bool Parser::parse_dly_format() {
     }
 
     if(parse_immediate(&p_immed)) {
-        return true; 
+        return true;
     }
 
     return false;

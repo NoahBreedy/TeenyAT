@@ -38,7 +38,7 @@ void Lexer::init_rules() {
 
     // Labels
     rules.push_back({ std::regex("^![A-Za-z_][A-Za-z0-9_]*"), T_LABEL });
-    
+
     // Constants
     rules.push_back({ std::regex("^\\.const(ant)?", std::regex_constants::icase), T_CONSTANT });
 
@@ -142,7 +142,7 @@ token Lexer::next_token() {
             if(len > best_len) {
                 best_len = len;
                 best_match = m;
-                best_rule = &rule;                
+                best_rule = &rule;
             }
         }
     }

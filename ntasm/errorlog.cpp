@@ -17,7 +17,6 @@ bool log_error(const token& tok, const std::string& message) {
    return false;
 }
 
-
 std::string word_to_hex(tny_word val) {
     std::string s = "";
     std::string map = "0123456789abcdef";

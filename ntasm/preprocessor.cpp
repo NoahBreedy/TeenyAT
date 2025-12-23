@@ -32,11 +32,11 @@ void Preprocessor::reset_lexer() {
 token Preprocessor::next_token() {
     while (!lexers.empty()) {
         token tok = current_lexer().next_token();
-        
+
         /* EOF of current lexer --> pop and continue */
         if (tok.type == T_EOL && tok.token_str.empty()) {
             lexers.pop();
-            if(!lexers.empty()) { 
+            if(!lexers.empty()) {
                 /* close the file opened */
                 opened_files.erase(tok.source_file);
                 oss << "---------- " << "EOF" << " -----------\n";
@@ -60,7 +60,7 @@ token Preprocessor::next_token() {
         if (!is_active()) {
             continue;
         }
-     
+
         return tok;
     }
 
@@ -73,7 +73,7 @@ void Preprocessor::handle_directive(const token& directive) {
     for(char& c : name) {
         c = std::tolower(c);
     }
-    
+
     /* need endif to be enabled even if in inactive zone */
     if(!is_active() && name != "endif") return;
 
@@ -184,7 +184,7 @@ void Preprocessor::handle_include() {
 
     if(opened_files.contains(filename)) {
         if(opened_files[filename]++ > INCLUDE_THRESHOLD) {
-            std::cerr << "FATAL ERROR: " << path.source_file << " on line " << 
+            std::cerr << "FATAL ERROR: " << path.source_file << " on line " <<
                 std::to_string(path.line_num) << " " << ltrim(line) << "\tmax amount of file includes reached (potential cyclic include?)" << std::endl;
             std::exit(EXIT_FAILURE);
         }
