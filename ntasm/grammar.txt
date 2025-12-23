@@ -94,6 +94,7 @@
               | <rol_instruction>
               | <ror_instruction>
               | <neg_instruction>
+              | <cmp_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -135,3 +136,6 @@
 
 <neg_instruction> ::= T_NEG T_REGISTER
 
+<cmp_instruction> ::= T_CMP T_REGISTER T_COMMA <register_and_immediate>
+
+                    
