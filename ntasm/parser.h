@@ -130,6 +130,8 @@ private:
     bool parse_dly_instruction();
     bool parse_dly_format();
     bool parse_dly_register_format();
+    bool parse_int_instruction();
+    bool parse_rti_instruction();
 
 };
 

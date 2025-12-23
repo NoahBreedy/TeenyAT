@@ -177,6 +177,8 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_NEG: return tny_word{u: TNY_OPCODE_MPY};
         case T_CMP: return tny_word{u: TNY_OPCODE_CMP};
         case T_DLY: return tny_word{u: TNY_OPCODE_DLY};
+        case T_INT: return tny_word{u: TNY_OPCODE_INT};
+        case T_RTI: return tny_word{u: TNY_OPCODE_RTI};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -806,7 +808,9 @@ bool Parser::parse_code_line() {
                              parse_ror_instruction() ||
                              parse_neg_instruction() ||
                              parse_cmp_instruction() ||
-                             parse_dly_instruction();
+                             parse_dly_instruction() ||
+                             parse_int_instruction() ||
+                             parse_rti_instruction();
 
     return matched_code_line;
 }
@@ -1169,6 +1173,28 @@ bool Parser::parse_dly_format() {
 bool Parser::parse_dly_instruction() {
     if(match(T_DLY, &p_opcode)) {
         if(parse_dly_format()) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_int_instruction() {
+    if(match(T_INT, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_rti_instruction() {
+    if(match(T_RTI, &p_opcode)) {
+        if(current.type == T_EOL) {
                 push_binary_instruction();
                 return true;
         }

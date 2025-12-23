@@ -96,6 +96,8 @@
               | <neg_instruction>
               | <cmp_instruction>
               | <dly_instruction>
+              | <int_instruction>
+              | <rti_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -143,4 +145,7 @@
 <dly_format>            ::= T_REGISTER <dly_register_format>?
 <dly_register_format>   ::= T_COMMA <register_and_immediate>
                           | <immediate>
-                    
+
+<int_instruction> ::= T_INT <register_and_immediate>
+
+<rti_instruction> ::= T_RTI
