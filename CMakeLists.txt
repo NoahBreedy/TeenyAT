@@ -38,5 +38,6 @@ target_include_directories(teenyat_d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 file(COPY teenyat.h DESTINATION "${CMAKE_BINARY_DIR}/out/include")
 
 add_subdirectory(tnasm)
+add_subdirectory(ntasm)
 add_subdirectory(lcd)
 add_subdirectory(edison)
