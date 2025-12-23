@@ -542,9 +542,10 @@ bool Parser::parse_label_line() {
         labels.insert({ label_name, obj });
     }else {
         labels[label_name].instances++;
+        labels[label_name].value = address; // needed because the labels value could change
         tny_uword line_num = labels[label_name].line_num;
         std::string file_name = labels[label_name].file_name;
-        if(labels[label_name].instances > 1) {
+        if(labels[label_name].instances > MAX_IDENTIFIER_INSTANCES) {
             std::string line = token_line_str(pp, label);
             valid_program    =  log_error(label, ltrim(line) +
                                 "\tduplicate label definition (defined in " + file_name +" on line " + std::to_string(line_num) + ")");
@@ -587,7 +588,7 @@ bool Parser::parse_constant_line() {
         consts_and_vars[name].instances++;
         tny_uword line_num = consts_and_vars[name].line_num;
         std::string file_name = consts_and_vars[name].file_name;
-        if(consts_and_vars[name].instances > 1) {
+        if(consts_and_vars[name].instances > MAX_IDENTIFIER_INSTANCES) {
             std::string line = token_line_str(pp, constant_token);
             valid_program    =  log_error(constant_token, ltrim(line) +
                                 "\tduplicate identifier \"" + name + "\" (defined in " + file_name + " on line " + std::to_string(line_num) + ")");
@@ -682,6 +683,7 @@ bool Parser::parse_variable_line() {
         consts_and_vars.insert({ name, obj });
     }else {
         consts_and_vars[name].instances++;
+        consts_and_vars[name].value = base_address; // needed for label expansion
         tny_uword line_num = consts_and_vars[name].line_num;
         std::string file_name = consts_and_vars[name].file_name;
         if(consts_and_vars[name].instances > 1) {

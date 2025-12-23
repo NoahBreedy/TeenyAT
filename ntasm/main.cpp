@@ -46,6 +46,9 @@ int main(int argc, char** argv) {
     parser.parse_program();
 
     /* Second pass resolve labels/identifiers */
+    parser.parse_program();
+
+    /* Third pass resolve expanded labels */
     bool valid_program = parser.parse_program();
 
     if(parser.debug_mode) {
