@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     Lexer* lexer = new Lexer(asm_lines, asm_filename.string());
     Preprocessor preprocessor(lexer);
     Parser parser(preprocessor, false);
-    
+
     /* First pass identify labels/identifiers */
     parser.parse_program();
 
@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     bool valid_program = parser.parse_program();
 
     if(parser.debug_mode) {
-        std::cout << parser.trace_log << std::endl;    
+        std::cout << parser.trace_log << std::endl;
     }
 
     if(valid_program) {
@@ -58,8 +58,8 @@ int main(int argc, char** argv) {
         }*/
         std::cout << parser.binary_listing << std::endl;
         if(parser.warning_log != "") {
-            std::cout << "------------------------------------" << std::endl; 
-            std::cout << parser.warning_log << std::endl; 
+            std::cout << "------------------------------------" << std::endl;
+            std::cout << parser.warning_log << std::endl;
         }
     }else {
         std::cerr << parser.error_log << std::endl;
