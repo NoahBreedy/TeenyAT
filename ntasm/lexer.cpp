@@ -91,6 +91,10 @@ void Lexer::init_rules() {
     rules.push_back({ std::regex("^jg\\b", std::regex_constants::icase),  T_JG });
     rules.push_back({ std::regex("^jge\\b", std::regex_constants::icase), T_JGE });
     rules.push_back({ std::regex("^lup\\b", std::regex_constants::icase), T_LUP });
+    rules.push_back({ std::regex("^inc\\b", std::regex_constants::icase), T_INC });
+    rules.push_back({ std::regex("^dec\\b", std::regex_constants::icase), T_DEC });
+    rules.push_back({ std::regex("^inv\\b", std::regex_constants::icase), T_INV });
+    rules.push_back({ std::regex("^ret\\b", std::regex_constants::icase), T_RET });
 
     // Hexadecimal number
     rules.push_back({ std::regex("^0x(_*[0-9a-f]+)+", std::regex_constants::icase), T_NUMBER });

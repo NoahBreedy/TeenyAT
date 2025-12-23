@@ -106,6 +106,10 @@
               | <jg_instruction>
               | <jge_instruction>
               | <lup_instruction>
+              | <inc_instruction>
+              | <dec_instruction>
+              | <inv_instruction>
+              | <ret_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -167,3 +171,11 @@
 <jge_instruction> ::= T_JGE <register_and_immediate>
 
 <lup_instruction> ::= T_LUP T_REGISTER T_COMMA <register_and_immediate>
+
+<inc_instruction> ::= T_INC T_REG
+
+<dec_instruction> ::= T_INC T_REG
+
+<inv_instruction> ::= T_NEG T_REG
+
+<ret_instruction> ::= T_RET
