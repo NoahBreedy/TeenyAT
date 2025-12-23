@@ -176,6 +176,7 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_ROR: return tny_word{u: TNY_OPCODE_ROT};
         case T_NEG: return tny_word{u: TNY_OPCODE_MPY};
         case T_CMP: return tny_word{u: TNY_OPCODE_CMP};
+        case T_DLY: return tny_word{u: TNY_OPCODE_DLY};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -805,6 +806,7 @@ bool Parser::parse_code_line() {
                              parse_ror_instruction() ||
                              parse_neg_instruction() ||
                              parse_cmp_instruction() ||
+                             parse_dly_instruction();
 
     return matched_code_line;
 }
@@ -1136,5 +1138,41 @@ bool Parser::parse_cmp_instruction() {
     return false;
 }
 
+bool Parser::parse_dly_register_format() {
+    if(match(T_COMMA)) {
+        return parse_register_and_immediate(&p_reg2, &p_immed);
+    }
+    
+    /* we need to swap reg1 and reg2 */
+    p_reg2.u = p_reg1.u;
+    p_reg1.u = TNY_REG_ZERO;
+    if(parse_immediate(&p_immed)) {
+        return true; 
+    }
+    
+    return current.type == T_EOL;
+}
 
+bool Parser::parse_dly_format() {
 
+    if(match(T_REGISTER, &p_reg1)) {
+        return parse_dly_register_format();
+    }
+
+    if(parse_immediate(&p_immed)) {
+        return true; 
+    }
+
+    return false;
+}
+
+bool Parser::parse_dly_instruction() {
+    if(match(T_DLY, &p_opcode)) {
+        if(parse_dly_format()) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}

@@ -127,6 +127,9 @@ private:
     bool parse_ror_instruction();
     bool parse_neg_instruction();
     bool parse_cmp_instruction();
+    bool parse_dly_instruction();
+    bool parse_dly_format();
+    bool parse_dly_register_format();
 
 };
 

@@ -95,6 +95,7 @@
               | <ror_instruction>
               | <neg_instruction>
               | <cmp_instruction>
+              | <dly_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -138,4 +139,8 @@
 
 <cmp_instruction> ::= T_CMP T_REGISTER T_COMMA <register_and_immediate>
 
+<dly_instruction>       ::= T_DLY <dly_format>
+<dly_format>            ::= T_REGISTER <dly_register_format>?
+<dly_register_format>   ::= T_COMMA <register_and_immediate>
+                          | <immediate>
                     
