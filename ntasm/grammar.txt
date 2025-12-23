@@ -105,6 +105,7 @@
               | <jle_instruction>
               | <jg_instruction>
               | <jge_instruction>
+              | <lup_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -165,5 +166,4 @@
 <jg_instruction>  ::= T_JG  <register_and_immediate>
 <jge_instruction> ::= T_JGE <register_and_immediate>
 
-
-
+<lup_instruction> ::= T_LUP T_REGISTER T_COMMA <register_and_immediate>
