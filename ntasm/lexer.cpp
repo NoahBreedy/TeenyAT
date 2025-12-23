@@ -80,6 +80,7 @@ void Lexer::init_rules() {
     rules.push_back({ std::regex("^ror\\b", std::regex_constants::icase), T_ROR });
     rules.push_back({ std::regex("^neg\\b", std::regex_constants::icase), T_NEG });
     rules.push_back({ std::regex("^cmp\\b", std::regex_constants::icase), T_CMP });
+    rules.push_back({ std::regex("^dly\\b", std::regex_constants::icase), T_DLY });
 
     // Hexadecimal number
     rules.push_back({ std::regex("^0x(_*[0-9a-f]+)+", std::regex_constants::icase), T_NUMBER });
