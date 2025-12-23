@@ -7,6 +7,8 @@
 #include "token.h"
 #include "teenyat.h"
 
+#define MAX_IDENTIFIER_INSTANCES 1
+
 class Parser {
 public:
     explicit Parser(Preprocessor& pp, bool debug);
