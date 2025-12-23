@@ -65,6 +65,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    /* spit out final binary */
+    std::string bin_file_name = asm_filename.stem().string() + ".bin";
+    std::ofstream bin_file(bin_file_name, std::ios::binary);
+	bin_file.write(reinterpret_cast<const char*>(parser.bin_words.data()), parser.bin_words.size() * sizeof(tny_word));
+
     return 0;
 }
 
