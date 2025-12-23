@@ -50,12 +50,10 @@ int main(int argc, char** argv) {
 
     if(parser.debug_mode) {
         std::cout << parser.trace_log << std::endl;
+        std::cout << "END OF TRACE\n" << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n" << std::endl;
     }
 
     if(valid_program) {
-        /*for(auto t : parser.bin_words) {
-            std::cout << std::hex << t.u << std::endl;
-        }*/
         std::cout << parser.binary_listing << std::endl;
         if(parser.warning_log != "") {
             std::cout << "------------------------------------" << std::endl;
