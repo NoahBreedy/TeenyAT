@@ -175,6 +175,7 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_ROL: return tny_word{u: TNY_OPCODE_ROT};
         case T_ROR: return tny_word{u: TNY_OPCODE_ROT};
         case T_NEG: return tny_word{u: TNY_OPCODE_MPY};
+        case T_CMP: return tny_word{u: TNY_OPCODE_CMP};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -492,6 +493,9 @@ void Parser::parse_line() {
 }
 
 bool Parser::parse_statement() {
+    p_reg1.u = 0;
+    p_reg2.u = 0;
+    p_immed.s = 0;
     bool matched_statement = parse_label_line() ||
                              parse_constant_line() ||
                              parse_variable_line() ||
@@ -799,7 +803,8 @@ bool Parser::parse_code_line() {
                              parse_rot_instruction() ||
                              parse_rol_instruction() ||
                              parse_ror_instruction() ||
-                             parse_neg_instruction();
+                             parse_neg_instruction() ||
+                             parse_cmp_instruction() ||
 
     return matched_code_line;
 }
@@ -1120,6 +1125,16 @@ bool Parser::parse_neg_instruction() {
     return false;
 }
 
+bool Parser::parse_cmp_instruction() {
+    if(match(T_CMP, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1) && match(T_COMMA) && parse_register_and_immediate(&p_reg2, &p_immed)) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
 
 
 
