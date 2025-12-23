@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "token.h"
-#include "teenyat.h"
+#include "../teenyat.h"
 #include "preprocessor.h"
 
 bool log_error(const token& tok, const std::string& message);

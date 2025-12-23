@@ -5,7 +5,7 @@
 
 #include "preprocessor.h"
 #include "token.h"
-#include "teenyat.h"
+#include "../teenyat.h"
 
 #define MAX_IDENTIFIER_INSTANCES 1
 
