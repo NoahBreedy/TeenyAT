@@ -189,6 +189,10 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_JG:  return tny_word{u: TNY_OPCODE_JMP};
         case T_JGE: return tny_word{u: TNY_OPCODE_JMP};
         case T_LUP: return tny_word{u: TNY_OPCODE_LUP};
+        case T_INC: return tny_word{u: TNY_OPCODE_ADD};
+        case T_DEC: return tny_word{u: TNY_OPCODE_SUB};
+        case T_INV: return tny_word{u: TNY_OPCODE_XOR};
+        case T_RET: return tny_word{u: TNY_OPCODE_POP};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -830,8 +834,11 @@ bool Parser::parse_code_line() {
                              parse_jle_instruction() ||
                              parse_jg_instruction()  ||
                              parse_jge_instruction() ||
-                             parse_lup_instruction();
-
+                             parse_lup_instruction() ||
+                             parse_inc_instruction() ||
+                             parse_dec_instruction() ||
+                             parse_inv_instruction() ||
+                             parse_ret_instruction();
 
     return matched_code_line;
 }
@@ -1325,3 +1332,58 @@ bool Parser::parse_lup_instruction() {
     }
     return false;
 }
+
+bool Parser::parse_inc_instruction() {
+    if(match(T_INC, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1)) {
+                /* this is a pseudo instruction add reg1, 1 */
+                p_immed.s = 1;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_dec_instruction() {
+    if(match(T_DEC, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1)) {
+                /* this is a pseudo instruction sub reg1, 1 */
+                p_immed.s = 1;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_inv_instruction() {
+    if(match(T_INV, &p_opcode)) {
+        if(match(T_REGISTER, &p_reg1)) {
+                /* this is a pseudo instruction xor reg1, -1 */
+                p_immed.s = -1;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_ret_instruction() {
+    if(match(T_RET, &p_opcode)) {
+        if(current.type == T_EOL) {
+                /* this is a pseudo instruction pop pc, sp */
+                p_reg1.u = TNY_REG_PC;
+                p_reg2.u = TNY_REG_SP;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+

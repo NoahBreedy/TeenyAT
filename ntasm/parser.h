@@ -140,6 +140,10 @@ private:
     bool parse_jg_instruction();
     bool parse_jge_instruction();
     bool parse_lup_instruction();
+    bool parse_inc_instruction();
+    bool parse_dec_instruction();
+    bool parse_inv_instruction();
+    bool parse_ret_instruction();
 
 };
 
