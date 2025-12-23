@@ -139,6 +139,7 @@ private:
     bool parse_jle_instruction();
     bool parse_jg_instruction();
     bool parse_jge_instruction();
+    bool parse_lup_instruction();
 
 };
 
