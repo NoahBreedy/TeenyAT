@@ -8,10 +8,14 @@ Preprocessor::Preprocessor(Lexer* root) {
     valid_program = true;
     root_src = root->src;
     root_filename = root->source_file;
+    root_lexer = root;
 }
 
 Lexer& Preprocessor::current_lexer() {
-    return *lexers.top();
+    if(!lexers.empty()) {
+        return *lexers.top();
+    }
+    return *root_lexer;
 }
 
 bool Preprocessor::is_active() {

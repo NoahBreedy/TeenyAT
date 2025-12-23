@@ -27,6 +27,7 @@ private:
     /* Stack of lexers (for @include) */
     std::stack<Lexer*> lexers;
 
+    Lexer* root_lexer;
     std::string root_src;
     std::string root_filename;
 
