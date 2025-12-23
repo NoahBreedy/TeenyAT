@@ -98,6 +98,13 @@
               | <dly_instruction>
               | <int_instruction>
               | <rti_instruction>
+              | <jmp_instruction>
+              | <je_instruction>
+              | <jne_instruction>
+              | <jl_instruction>
+              | <jle_instruction>
+              | <jg_instruction>
+              | <jge_instruction>
 
 <set_instruction> ::= T_SET T_REGISTER T_COMMA <register_and_immediate>
 
@@ -149,3 +156,14 @@
 <int_instruction> ::= T_INT <register_and_immediate>
 
 <rti_instruction> ::= T_RTI
+
+<jmp_instruction> ::= T_JMP <register_and_immediate>
+<je_instruction>  ::= T_JE  <register_and_immediate>
+<jne_instruction> ::= T_JNE <register_and_immediate>
+<jl_instruction>  ::= T_JL  <register_and_immediate>
+<jle_instruction> ::= T_JLE <register_and_immediate>
+<jg_instruction>  ::= T_JG  <register_and_immediate>
+<jge_instruction> ::= T_JGE <register_and_immediate>
+
+
+

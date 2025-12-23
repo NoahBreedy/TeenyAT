@@ -88,10 +88,11 @@ void Parser::push_binary_instruction() {
 
     bin_word_1.s = p_immed.s;
 
-    bool teeny = is_teeny(p_immed.s);
+    /* jmp instructions cannot be teeny unfortunately */
+    bool teeny = is_teeny(p_immed.s) && !jump_inst;
 
     /* jmp instructions cannot be teeny unfortunately */
-    if(teeny && !jump_inst) {
+    if(teeny) {
        bin_word_0.instruction.immed4 = p_immed.s;
        bin_word_0.instruction.teeny  = 1;
     }
@@ -150,6 +151,7 @@ bool Parser::expect(token_type t) {
 }
 
 tny_word Parser::token_to_opcode(token_type t) {
+    jump_inst = false;
     switch(t) {
         case T_SET: return tny_word{u: TNY_OPCODE_SET};
         case T_LOD: return tny_word{u: TNY_OPCODE_LOD};
@@ -179,6 +181,13 @@ tny_word Parser::token_to_opcode(token_type t) {
         case T_DLY: return tny_word{u: TNY_OPCODE_DLY};
         case T_INT: return tny_word{u: TNY_OPCODE_INT};
         case T_RTI: return tny_word{u: TNY_OPCODE_RTI};
+        case T_JMP: return tny_word{u: TNY_OPCODE_JMP};
+        case T_JE:  return tny_word{u: TNY_OPCODE_JMP};
+        case T_JNE: return tny_word{u: TNY_OPCODE_JMP};
+        case T_JL:  return tny_word{u: TNY_OPCODE_JMP};
+        case T_JLE: return tny_word{u: TNY_OPCODE_JMP};
+        case T_JG:  return tny_word{u: TNY_OPCODE_JMP};
+        case T_JGE: return tny_word{u: TNY_OPCODE_JMP};
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
 }
@@ -499,6 +508,8 @@ bool Parser::parse_statement() {
     p_reg1.u = 0;
     p_reg2.u = 0;
     p_immed.s = 0;
+    p_condition_flags.u = 0;
+    jump_inst = false;
     bool matched_statement = parse_label_line() ||
                              parse_constant_line() ||
                              parse_variable_line() ||
@@ -810,7 +821,15 @@ bool Parser::parse_code_line() {
                              parse_cmp_instruction() ||
                              parse_dly_instruction() ||
                              parse_int_instruction() ||
-                             parse_rti_instruction();
+                             parse_rti_instruction() ||
+                             parse_jmp_instruction() ||
+                             parse_je_instruction()  ||
+                             parse_jne_instruction() ||
+                             parse_jl_instruction()  ||
+                             parse_jle_instruction() ||
+                             parse_jg_instruction()  ||
+                             parse_jge_instruction();
+
 
     return matched_code_line;
 }
@@ -1195,6 +1214,97 @@ bool Parser::parse_int_instruction() {
 bool Parser::parse_rti_instruction() {
     if(match(T_RTI, &p_opcode)) {
         if(current.type == T_EOL) {
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_jmp_instruction() {
+    if(match(T_JMP, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 0;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_jne_instruction() {
+    if(match(T_JNE, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 3;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_je_instruction() {
+    if(match(T_JE, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 4;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_jl_instruction() {
+    if(match(T_JL, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 2;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_jle_instruction() {
+    if(match(T_JLE, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 6;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_jg_instruction() {
+    if(match(T_JG, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 1;
+                push_binary_instruction();
+                return true;
+        }
+        skip_line();
+    }
+    return false;
+}
+
+bool Parser::parse_jge_instruction() {
+    if(match(T_JGE, &p_opcode)) {
+        if(parse_register_and_immediate(&p_reg1, &p_immed)) {
+                jump_inst = true;
+                p_condition_flags.u = 5;
                 push_binary_instruction();
                 return true;
         }

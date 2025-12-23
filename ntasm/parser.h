@@ -132,6 +132,13 @@ private:
     bool parse_dly_register_format();
     bool parse_int_instruction();
     bool parse_rti_instruction();
+    bool parse_jmp_instruction();
+    bool parse_je_instruction();
+    bool parse_jne_instruction();
+    bool parse_jl_instruction();
+    bool parse_jle_instruction();
+    bool parse_jg_instruction();
+    bool parse_jge_instruction();
 
 };
 
