@@ -120,7 +120,6 @@
 <psh_instruction> ::= T_PSH <psh_format>
 <psh_format>      ::= T_LBRACKET T_REGISTER T_RBRACKET T_COMMA <register_and_immediate>
                     | <register_and_immediate>
-                    | <immediate>
 
 <pop_instruction> ::= T_POP T_REGISTER <pop_format>?
 <pop_format>      ::= T_COMMA T_LBRACKET T_REGISTER T_RBRACKET
@@ -155,6 +154,7 @@
 
 <dly_instruction>       ::= T_DLY <dly_format>
 <dly_format>            ::= T_REGISTER <dly_register_format>?
+                          | <immediate> <includes_register>?
 <dly_register_format>   ::= T_COMMA <register_and_immediate>
                           | <immediate>
 
@@ -172,10 +172,10 @@
 
 <lup_instruction> ::= T_LUP T_REGISTER T_COMMA <register_and_immediate>
 
-<inc_instruction> ::= T_INC T_REG
+<inc_instruction> ::= T_INC T_REGISTER
 
-<dec_instruction> ::= T_INC T_REG
+<dec_instruction> ::= T_INC T_REGISTER
 
-<inv_instruction> ::= T_NEG T_REG
+<inv_instruction> ::= T_NEG T_REGISTER
 
 <ret_instruction> ::= T_RET
