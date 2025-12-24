@@ -8,6 +8,11 @@
 #include "preprocessor.h"
 #include "parser.h"
 
+/**
+ *  TODO: work on runtime memory leeeekage (on avg im missing about 2,000 frees i hate global memory)
+ *  TODO: fix compile warnings so we can get a clean build
+ */
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cerr << "usage: assembler <file.asm | file.S>\n";
