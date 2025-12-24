@@ -10,7 +10,6 @@
 
 /**
  *  TODO: work on runtime memory leeeekage (on avg im missing about 2,000 frees i hate global memory)
- *  TODO: fix compile warnings so we can get a clean build
  */
 
 int main(int argc, char** argv) {
