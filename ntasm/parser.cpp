@@ -152,56 +152,68 @@ bool Parser::expect(token_type t) {
 
 tny_word Parser::token_to_opcode(token_type t) {
     jump_inst = false;
+    tny_word result;
     switch(t) {
-        case T_SET: return tny_word{u: TNY_OPCODE_SET};
-        case T_LOD: return tny_word{u: TNY_OPCODE_LOD};
-        case T_STR: return tny_word{u: TNY_OPCODE_STR};
-        case T_PSH: return tny_word{u: TNY_OPCODE_PSH};
-        case T_POP: return tny_word{u: TNY_OPCODE_POP};
-        case T_BTS: return tny_word{u: TNY_OPCODE_BTS};
-        case T_BTC: return tny_word{u: TNY_OPCODE_BTC};
-        case T_BTF: return tny_word{u: TNY_OPCODE_BTF};
-        case T_CAL: return tny_word{u: TNY_OPCODE_CAL};
-        case T_ADD: return tny_word{u: TNY_OPCODE_ADD};
-        case T_SUB: return tny_word{u: TNY_OPCODE_SUB};
-        case T_MPY: return tny_word{u: TNY_OPCODE_MPY};
-        case T_DIV: return tny_word{u: TNY_OPCODE_DIV};
-        case T_MOD: return tny_word{u: TNY_OPCODE_MOD};
-        case T_AND: return tny_word{u: TNY_OPCODE_AND};
-        case T_OR:  return tny_word{u: TNY_OPCODE_OR };
-        case T_XOR: return tny_word{u: TNY_OPCODE_XOR};
-        case T_SHF: return tny_word{u: TNY_OPCODE_SHF};
-        case T_SHL: return tny_word{u: TNY_OPCODE_SHF};
-        case T_SHR: return tny_word{u: TNY_OPCODE_SHF};
-        case T_ROT: return tny_word{u: TNY_OPCODE_ROT};
-        case T_ROL: return tny_word{u: TNY_OPCODE_ROT};
-        case T_ROR: return tny_word{u: TNY_OPCODE_ROT};
-        case T_NEG: return tny_word{u: TNY_OPCODE_MPY};
-        case T_CMP: return tny_word{u: TNY_OPCODE_CMP};
-        case T_DLY: return tny_word{u: TNY_OPCODE_DLY};
-        case T_INT: return tny_word{u: TNY_OPCODE_INT};
-        case T_RTI: return tny_word{u: TNY_OPCODE_RTI};
-        case T_JMP: return tny_word{u: TNY_OPCODE_JMP};
-        case T_JE:  return tny_word{u: TNY_OPCODE_JMP};
-        case T_JNE: return tny_word{u: TNY_OPCODE_JMP};
-        case T_JL:  return tny_word{u: TNY_OPCODE_JMP};
-        case T_JLE: return tny_word{u: TNY_OPCODE_JMP};
-        case T_JG:  return tny_word{u: TNY_OPCODE_JMP};
-        case T_JGE: return tny_word{u: TNY_OPCODE_JMP};
-        case T_LUP: return tny_word{u: TNY_OPCODE_LUP};
-        case T_INC: return tny_word{u: TNY_OPCODE_ADD};
-        case T_DEC: return tny_word{u: TNY_OPCODE_SUB};
-        case T_INV: return tny_word{u: TNY_OPCODE_XOR};
-        case T_RET: return tny_word{u: TNY_OPCODE_POP};
+        case T_SET: result.u = TNY_OPCODE_SET; break;
+        case T_LOD: result.u = TNY_OPCODE_LOD; break;
+        case T_STR: result.u = TNY_OPCODE_STR; break;
+        case T_PSH: result.u = TNY_OPCODE_PSH; break;
+        case T_POP: result.u = TNY_OPCODE_POP; break;
+        case T_BTS: result.u = TNY_OPCODE_BTS; break;
+        case T_BTC: result.u = TNY_OPCODE_BTC; break;
+        case T_BTF: result.u = TNY_OPCODE_BTF; break;
+        case T_CAL: result.u = TNY_OPCODE_CAL; break;
+        case T_ADD: result.u = TNY_OPCODE_ADD; break;
+        case T_SUB: result.u = TNY_OPCODE_SUB; break;
+        case T_MPY: result.u = TNY_OPCODE_MPY; break;
+        case T_DIV: result.u = TNY_OPCODE_DIV; break;
+        case T_MOD: result.u = TNY_OPCODE_MOD; break;
+        case T_AND: result.u = TNY_OPCODE_AND; break;
+        case T_OR:  result.u = TNY_OPCODE_OR;  break;
+        case T_XOR: result.u = TNY_OPCODE_XOR; break;
+        case T_SHF:
+        case T_SHL:
+        case T_SHR:
+            result.u = TNY_OPCODE_SHF;
+            break;
+        case T_ROT:
+        case T_ROL:
+        case T_ROR:
+            result.u = TNY_OPCODE_ROT;
+            break;
+        case T_NEG: result.u = TNY_OPCODE_MPY; break;
+        case T_CMP: result.u = TNY_OPCODE_CMP; break;
+        case T_DLY: result.u = TNY_OPCODE_DLY; break;
+        case T_INT: result.u = TNY_OPCODE_INT; break;
+        case T_RTI: result.u = TNY_OPCODE_RTI; break;
+        case T_JMP:
+        case T_JE:
+        case T_JNE:
+        case T_JL:
+        case T_JLE:
+        case T_JG:
+        case T_JGE:
+            result.u = TNY_OPCODE_JMP;
+            break;
+        case T_LUP: result.u = TNY_OPCODE_LUP; break;
+        case T_INC: result.u = TNY_OPCODE_ADD; break;
+        case T_DEC: result.u = TNY_OPCODE_SUB; break;
+        case T_INV: result.u = TNY_OPCODE_XOR; break;
+        case T_RET: result.u = TNY_OPCODE_POP; break;
         default: std::cerr << "Fatal error unknown opcode (should never see this)" << std::endl; std::exit(EXIT_FAILURE);
     }
+    return result;
 }
 
 void Parser::set_destination(token token, tny_word* dest) {
+    tny_word t_one;
+    t_one.u = 1;
+    tny_word t_zero;
+    t_zero.u = 0;
     switch(token.type) {
         case T_REGISTER:        *dest = register_to_value(token.token_str); break;
-        case T_PLUS:            *dest = tny_word{u: 0}; break;
-        case T_MINUS:           *dest = tny_word{u: 1}; break;
+        case T_PLUS:            *dest = t_zero; break;
+        case T_MINUS:           *dest = t_one; break;
         case T_NUMBER:          *dest = process_number(token.token_str); break;
         case T_LABEL:           *dest = process_label(token.token_str); break;
         case T_IDENTIFIER:      *dest = process_identifier(token.token_str); break;
@@ -220,6 +232,8 @@ tny_word Parser::process_packed_string(std::string s) {
 
     std::string val = " ";
     tny_word string_value;
+    string_value.u = 0;
+
     tny_uword index = 0;
     if(is_raw_line) {
         index = raw_line_index;
@@ -281,6 +295,7 @@ tny_word Parser::process_string(std::string s) {
 
     std::string val = " ";
     tny_word bin;
+    bin.u = 0;
     tny_uword index = 0;
     if(is_raw_line) {
         index = raw_line_index;
@@ -323,6 +338,7 @@ tny_word Parser::process_string(std::string s) {
 
 tny_word Parser::process_identifier(std::string s) {
     tny_word result;
+    result.s = 0;
 
     if(consts_and_vars.contains(s)) {
         result.s =  consts_and_vars[s].value.s;
@@ -538,7 +554,11 @@ bool Parser::parse_label_line() {
     oss << "        " << std::setw(max_lines) << current.line_num << ": [           ]  " << line << "\n";
 
     if(!labels.contains(label_name)) {
-        container obj = {value: address, instances: 1, line_num: (tny_uword)label.line_num, file_name: label.source_file};
+        container obj;
+        obj.value = address;
+        obj.instances = 1;
+        obj.line_num = (tny_uword)label.line_num;
+        obj.file_name = label.source_file;
         labels.insert({ label_name, obj });
     }else {
         labels[label_name].instances++;
@@ -582,7 +602,11 @@ bool Parser::parse_constant_line() {
     }
 
     if(!consts_and_vars.contains(name)) {
-        container obj = {value: value, instances: 1, line_num: (tny_uword)constant_token.line_num, file_name:constant_token.source_file};
+        container obj;
+        obj.value = value;
+        obj.instances = 1;
+        obj.line_num = (tny_uword)constant_token.line_num;
+        obj.file_name = constant_token.source_file;
         consts_and_vars.insert({ name, obj });
     }else {
         consts_and_vars[name].instances++;
@@ -679,7 +703,11 @@ bool Parser::parse_variable_line() {
     }
 
     if(!consts_and_vars.contains(name)) {
-        container obj = {value: base_address, instances: 1, line_num: (tny_uword)variable_token.line_num, file_name:variable_token.source_file};
+        container obj;
+        obj.value = base_address;
+        obj.instances = 1;
+        obj.line_num = (tny_uword)variable_token.line_num;
+        obj.file_name = variable_token.source_file;
         consts_and_vars.insert({ name, obj });
     }else {
         consts_and_vars[name].instances++;
