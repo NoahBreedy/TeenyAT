@@ -156,7 +156,7 @@
 <dly_format>            ::= T_REGISTER <dly_register_format>?
                           | <immediate> <includes_register>?
 <dly_register_format>   ::= T_COMMA <register_and_immediate>
-                          | <immediate>
+                          | <plus_or_minus> <immediate>
 
 <int_instruction> ::= T_INT <register_and_immediate>
 
