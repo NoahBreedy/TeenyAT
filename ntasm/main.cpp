@@ -10,6 +10,7 @@
 
 /**
  *  TODO: work on runtime memory leeeekage (on avg im missing about 2,000 frees i hate global memory)
+ *  TODO: work on @including relative paths so you can run ntasm from anywhere
  */
 
 int main(int argc, char** argv) {
