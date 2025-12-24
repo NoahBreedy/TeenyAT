@@ -109,4 +109,5 @@ ret
 
 set rA, rB - -10
 
+dly rA + -10
 @endif

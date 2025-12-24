@@ -528,6 +528,7 @@ bool Parser::parse_statement() {
     p_reg2.u = 0;
     p_immed.s = 0;
     p_condition_flags.u = 0;
+    p_negative.u = 0;
     jump_inst = false;
     bool matched_statement = parse_label_line() ||
                              parse_constant_line() ||
@@ -786,8 +787,6 @@ bool Parser::parse_immediate(tny_word* immed) {
         return parse_raw_value(immed);
    }
 
-   /* this means its just the value given no negation needed */
-   p_negative.u = 0;
    return parse_raw_value(immed);
 }
 
@@ -1201,8 +1200,9 @@ bool Parser::parse_dly_register_format() {
     /* we need to swap reg1 and reg2 */
     p_reg2.u = p_reg1.u;
     p_reg1.u = TNY_REG_ZERO;
-    if(parse_immediate(&p_immed)) {
-        return true;
+
+    if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
+            return parse_immediate(&p_immed);
     }
 
     return current.type == T_EOL;
