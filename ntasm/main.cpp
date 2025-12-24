@@ -13,6 +13,8 @@
  *  TODO: work on @including relative paths so you can run ntasm from anywhere
  */
 
+#define PREFORM_TRACING false
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cerr << "usage: assembler <file.asm | file.S>\n";
@@ -45,7 +47,7 @@ int main(int argc, char** argv) {
 
     Lexer* lexer = new Lexer(asm_lines, asm_filename.string());
     Preprocessor preprocessor(lexer);
-    Parser parser(preprocessor, false);
+    Parser parser(preprocessor, PREFORM_TRACING);
 
     /* First pass identify labels/identifiers */
     parser.parse_program();
