@@ -921,11 +921,6 @@ bool Parser::parse_psh_format() {
         return true;
     }
 
-    if(parse_immediate(&p_immed)) {
-        p_reg2.u = TNY_REG_ZERO;
-        return true;
-    }
-
     return false;
 }
 
@@ -1220,8 +1215,8 @@ bool Parser::parse_dly_format() {
     if(match(T_REGISTER, &p_reg1)) {
         return parse_dly_register_format();
     }
-
-    if(parse_immediate(&p_immed)) {
+    /* dly uses register 2 */
+    if(parse_immediate(&p_immed) && parse_includes_register(&p_reg2)) {
         return true;
     }
 
