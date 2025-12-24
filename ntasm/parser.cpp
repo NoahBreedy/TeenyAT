@@ -206,14 +206,12 @@ tny_word Parser::token_to_opcode(token_type t) {
 }
 
 void Parser::set_destination(token token, tny_word* dest) {
-    tny_word t_one;
-    t_one.u = 1;
-    tny_word t_zero;
-    t_zero.u = 0;
+    tny_word reverse_p_negative;
+    reverse_p_negative.u = p_negative.u ? 0 : 1;
     switch(token.type) {
         case T_REGISTER:        *dest = register_to_value(token.token_str); break;
-        case T_PLUS:            *dest = t_zero; break;
-        case T_MINUS:           *dest = t_one; break;
+        case T_PLUS:            *dest = p_negative; break;
+        case T_MINUS:           *dest = reverse_p_negative; break;
         case T_NUMBER:          *dest = process_number(token.token_str); break;
         case T_LABEL:           *dest = process_label(token.token_str); break;
         case T_IDENTIFIER:      *dest = process_identifier(token.token_str); break;
@@ -801,7 +799,7 @@ bool Parser::parse_no_sign_immediate(tny_word* immed) {
 
 bool Parser::parse_includes_immediate(tny_word* immed) {
     if(match(T_PLUS, &p_negative) || match(T_MINUS, &p_negative)) {
-        return parse_no_sign_immediate(immed);
+        return parse_immediate(immed);
     }
     immed->u = 0;
     return true;

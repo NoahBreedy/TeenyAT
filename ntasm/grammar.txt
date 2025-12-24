@@ -52,7 +52,7 @@
 <register_and_immediate> ::= T_REGISTER <includes_immediate>?
                            | <immediate> <includes_register>?
 
-<includes_immediate> ::= <plus_or_minus> <no_sign_immediate>
+<includes_immediate> ::= <plus_or_minus> <immediate>
 
 <includes_register> ::= T_PLUS T_REGISTER
 
