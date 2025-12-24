@@ -107,4 +107,6 @@ dec rA
 inv PC
 ret
 
+set rA, rB - -10
+
 @endif
