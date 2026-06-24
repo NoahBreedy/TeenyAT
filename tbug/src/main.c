@@ -29,7 +29,7 @@ Clay_ElementDeclaration outerContainerConfig = (Clay_ElementDeclaration) {
                             .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) },
                             .padding = {16,16,16,16},
                             .childGap = 16 },
-    .backgroundColor = OUTER_COLOR 
+    .backgroundColor = OUTER_COLOR
 };
 
 Clay_ElementDeclaration asmContainerConfig = (Clay_ElementDeclaration) {
@@ -37,7 +37,7 @@ Clay_ElementDeclaration asmContainerConfig = (Clay_ElementDeclaration) {
                             .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) },
                             .padding = {16,16,16,16},
                             .childGap = 32 },
-    .backgroundColor = HEADER_COLOR 
+    .backgroundColor = HEADER_COLOR
 };
 
 Clay_ElementDeclaration memoryContainerConfig = (Clay_ElementDeclaration) {
@@ -45,7 +45,7 @@ Clay_ElementDeclaration memoryContainerConfig = (Clay_ElementDeclaration) {
                             .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) },
                             .padding = {16,16,16,16},
                             .childGap = 32 },
-    .backgroundColor = HEADER_COLOR 
+    .backgroundColor = HEADER_COLOR
 };
 
 
@@ -104,7 +104,8 @@ int main() {
 
                 CLAY(CLAY_ID("DisassemblyWindow"), {
                         .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
-                                    .sizing = { .width = CLAY_SIZING_FIXED(500), .height = CLAY_SIZING_GROW(0) },
+                                    .sizing = { .width = CLAY_SIZING_FIXED(500),
+                                                .height = CLAY_SIZING_GROW(0) },
                                     .padding = CLAY_PADDING_ALL(16),
                                     .childGap = 16 },
                         .backgroundColor = BOX_COLOR }) {
