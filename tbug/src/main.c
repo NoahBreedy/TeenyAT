@@ -3,8 +3,6 @@
 
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
-
-#include "input.h"
 #include "clay_colors.h"
 #include "clay_renderer_tigr.h"
 
@@ -14,6 +12,8 @@
 #include "gui/register_window.h"
 
 #define KEY_BACKSPACE 0x08
+
+void handleKeyBoard(Tigr* ctx);
 
 void HandleClayErrors(Clay_ErrorData errorData) {
     printf("%s\n", errorData.errorText.chars);
@@ -44,34 +44,6 @@ Clay_ElementDeclaration memoryContainerConfig = (Clay_ElementDeclaration) {
                             .childGap = 32 },
     .backgroundColor = HEADER_COLOR
 };
-
-void handleKeyBoard(Tigr* ctx) {
-    for (;;) {
-        int c = tigrReadChar(ctx);
-        if (c == 0) {
-           break;
-        }
-
-        /* Handle text input */
-        if(current_input != -1) {
-            uint32_t cursor = input_boxes[current_input]->cursor;
-            uint32_t max_size = input_boxes[current_input]->size;
-
-            /* Backspace */
-            if(c == KEY_BACKSPACE && cursor > 0) {
-                cursor--;
-                input_boxes[current_input]->value[cursor] = '\0';
-            }else if(cursor < max_size && c != KEY_BACKSPACE) {
-                input_boxes[current_input]->value[cursor] = c;
-                cursor++;
-            }
-
-            input_boxes[current_input]->cursor = cursor;
-        }
-
-    }
-    return;
-}
 
 int main() {
     uint64_t totalMemorySize = Clay_MinMemorySize();
@@ -142,4 +114,32 @@ int main() {
 
     FREE_INPUTS();
     tigrFree(win);
+}
+
+void handleKeyBoard(Tigr* ctx) {
+    for (;;) {
+        int c = tigrReadChar(ctx);
+        if (c == 0) {
+           break;
+        }
+
+        /* Handle text input */
+        if(current_input != -1) {
+            uint32_t cursor = input_boxes[current_input]->cursor;
+            uint32_t max_size = input_boxes[current_input]->size;
+
+            /* Backspace */
+            if(c == KEY_BACKSPACE && cursor > 0) {
+                cursor--;
+                input_boxes[current_input]->value[cursor] = '\0';
+            }else if(cursor < max_size && c != KEY_BACKSPACE) {
+                input_boxes[current_input]->value[cursor] = c;
+                cursor++;
+            }
+
+            input_boxes[current_input]->cursor = cursor;
+        }
+
+    }
+    return;
 }
