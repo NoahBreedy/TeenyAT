@@ -4,21 +4,16 @@
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 
-#include <string.h>
-
 #include "input.h"
+#include "clay_colors.h"
 #include "clay_renderer_tigr.h"
 
-#define KEY_BACKSPACE 0x08
+#include "gui/code_window.h"
+#include "gui/header_window.h"
+#include "gui/memory_window.h"
+#include "gui/register_window.h"
 
-const Clay_Color OUTER_COLOR = (Clay_Color) {8, 12, 25, 255};
-const Clay_Color HEADER_COLOR = (Clay_Color) {29, 35, 42, 255};
-const Clay_Color BOX_COLOR = (Clay_Color) {67, 84, 105, 255};
-const Clay_Color BOX_2_COLOR = (Clay_Color) {46, 63, 84, 255};
-const Clay_Color COLOR_ORANGE = (Clay_Color) {225, 138, 50, 255};
-const Clay_Color COLOR_BLUE = (Clay_Color) {0, 50, 215, 255};
-const Clay_Color COLOR_RED = (Clay_Color) {255, 50, 10, 255};
-const Clay_Color COLOR_GREEN = (Clay_Color) {50, 250, 60, 255};
+#define KEY_BACKSPACE 0x08
 
 void HandleClayErrors(Clay_ErrorData errorData) {
     printf("%s\n", errorData.errorText.chars);
@@ -49,33 +44,6 @@ Clay_ElementDeclaration memoryContainerConfig = (Clay_ElementDeclaration) {
                             .childGap = 32 },
     .backgroundColor = HEADER_COLOR
 };
-
-Clay_ElementDeclaration inputBoxConfig = (Clay_ElementDeclaration) {
-    .layout = {
-        .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }
-    }
-};
-
-void HandleInputBoxInteraction(Clay_ElementId elementId, Clay_PointerData pointerInfo, void *userData) {
-    InputBox *inputData = (InputBox *)userData;
-
-    // Pointer state allows you to detect mouse down / hold / release
-    if (pointerInfo.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        TURN_OFF_FOCUS();
-        inputData->focused = true;
-        SET_CURRENT_FOCUSED_ID(inputData->id);
-    }
-}
-
-void InputBoxComponent(char* label, int id) {
-    Clay_String box_txt = (Clay_String){.isStaticallyAllocated = false, .length = input_boxes[id]->size, .chars = input_boxes[id]->value};
-    Clay_String label_txt = (Clay_String){.isStaticallyAllocated = true, .length = strlen(label), .chars = label};
-    CLAY_AUTO_ID(inputBoxConfig) {
-        Clay_OnHover(HandleInputBoxInteraction, input_boxes[id]);
-        CLAY_TEXT(label_txt, { .fontSize = 16, .textColor = {255, 255, 255, 255} });
-        CLAY_TEXT(box_txt, { .fontSize = 16, .textColor = {255, 255, 255, 255} });
-    }
-}
 
 void handleKeyBoard(Tigr* ctx) {
     for (;;) {
@@ -148,69 +116,17 @@ int main() {
 
         CLAY(CLAY_ID("OuterContainer"), outerContainerConfig) {
 
-            CLAY(CLAY_ID("Header"), {
-                .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
-                            .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(80) },
-                            .padding = CLAY_PADDING_ALL(0),
-                            .childGap = 16,
-                            .childAlignment = { .y = CLAY_ALIGN_Y_CENTER }
-                        },
-                .backgroundColor = HEADER_COLOR }) {
-                    CLAY(CLAY_ID("ProfilePicture"), {
-                            .layout = {
-                                .sizing = {
-                                    .width = CLAY_SIZING_FIXED(70),
-                                    .height = CLAY_SIZING_FIXED(86) }
-                              },
-                            .image = { .imageData = "resources/leroy.png" } }) {
-
-                    }
-                    CLAY_TEXT(CLAY_STRING("TEENY BUG"), { .fontSize = 24, .textColor = {255, 255, 255, 255} });
-            }
+            HeaderWindow();
 
             CLAY(CLAY_ID("AsmContainer"), asmContainerConfig) {
 
-                CLAY(CLAY_ID("DisassemblyWindow"), {
-                        .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
-                                    .sizing = { .width = CLAY_SIZING_FIXED(500),
-                                                .height = CLAY_SIZING_GROW(0) },
-                                    .padding = CLAY_PADDING_ALL(16),
-                                    .childGap = 16 },
-                        .backgroundColor = BOX_COLOR }) {
-
-                }
+                CodeWindow();
 
                 CLAY(CLAY_ID("MemoryContainer"), memoryContainerConfig) {
 
-                    CLAY(CLAY_ID("RegisterWindow"), {
-                            .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                                        .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(150) },
-                                        .padding = CLAY_PADDING_ALL(0),
-                                        .childGap = 16 },
-                            .backgroundColor = BOX_COLOR }) {
+                    RegisterWindow();
 
-                    }
-
-                    CLAY(CLAY_ID("MemoryWindow"), {
-                            .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                                        .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) },
-                                        .padding = CLAY_PADDING_ALL(16),
-                                        .childGap = 16 },
-                            .backgroundColor = BOX_COLOR }) {
-
-                        CLAY(CLAY_ID("SearchBar"), {
-                                .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
-                                            .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(30) },
-                                            .padding = CLAY_PADDING_ALL(8),
-                                            .childGap = 8 },
-                                .backgroundColor = BOX_2_COLOR }) {
-
-                            /* Place input box in the searchbar */
-                            InputBoxComponent("Mem Address: ", 0);
-
-                        }
-
-                    }
+                    MemoryWindow();
 
                 }
 

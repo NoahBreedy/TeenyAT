@@ -1,0 +1,13 @@
+#include "gui/code_window.h"
+
+void CodeWindow() {
+    CLAY(CLAY_ID("CodeWindow"), {
+            .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                        .sizing = { .width = CLAY_SIZING_FIXED(500),
+                                    .height = CLAY_SIZING_GROW(0) },
+                        .padding = CLAY_PADDING_ALL(16),
+                        .childGap = 16 },
+            .backgroundColor = BOX_COLOR }) {
+
+    }
+}
