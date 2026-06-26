@@ -9,7 +9,7 @@
 Clay_ElementDeclaration inputBoxConfig = (Clay_ElementDeclaration) {
     .layout = {
         .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }
-    }
+    },
 };
 
 void HandleInputBoxInteraction(Clay_ElementId elementId, Clay_PointerData pointerInfo, void *userData) {
@@ -47,6 +47,7 @@ void MemoryWindow() {
                             .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(30) },
                             .padding = CLAY_PADDING_ALL(8),
                             .childGap = 8 },
+                .border = { .width = { 16, 16, 16, 16, 0 }, .color = COLOR_WHITE },
                 .backgroundColor = BOX_2_COLOR }) {
 
             /* Place input box in the searchbar */
