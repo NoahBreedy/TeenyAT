@@ -1,6 +1,6 @@
 /* For memoery and most likely asm portion im going to need to keep track
  * of how many elements im going to display */
-
+#include <locale.h>
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 #include "clay_colors.h"
@@ -46,6 +46,12 @@ Clay_ElementDeclaration memoryContainerConfig = (Clay_ElementDeclaration) {
 };
 
 int main() {
+    /* Try en_US.UTF-8 locale (my wsl defaults to C.UTF-8 :( */
+    char *current_locale = setlocale(LC_NUMERIC, "en_US.UTF-8");
+    if(!current_locale) {
+        current_locale = setlocale(LC_NUMERIC, "");
+    }
+
     uint64_t totalMemorySize = Clay_MinMemorySize();
     Clay_Arena arena = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
 
@@ -68,6 +74,8 @@ int main() {
      * 0x0000 -> 0x7FFF
      * */
     CREATE_INPUT_BOX(6);
+
+    char* string_arena = calloc(1024, sizeof(char));
 
     uint64_t frame_cnt = 0;
     while(!tigrClosed(win) && !tigrKeyDown(win, TK_ESCAPE)) {
@@ -96,7 +104,7 @@ int main() {
 
                 CLAY(CLAY_ID("MemoryContainer"), memoryContainerConfig) {
 
-                    RegisterWindow();
+                    RegisterWindow(string_arena);
 
                     MemoryWindow();
 
@@ -110,9 +118,11 @@ int main() {
         Clay_Tigr_Render(renderCommands, win);
 
         tigrUpdate(win);
+
     }
 
     FREE_INPUTS();
+    free(string_arena);
     tigrFree(win);
 }
 
