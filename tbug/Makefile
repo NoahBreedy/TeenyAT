@@ -8,6 +8,7 @@ TARGET := $(BIN_DIR)/main
 
 CFLAGS  := -Iinclude
 LDFLAGS := -lm
+DEBUG_FLAGS :=
 
 # Platform-specific libraries
 ifeq ($(OS),Windows_NT)
@@ -50,7 +51,7 @@ DEPS := $(OBJS:.o=.d)
 
 all: $(TARGET)
 
-debug: CFLAGS += -fsanitize=address -g -O0
+debug: DEBUG_FLAGS += -fsanitize=address -g -O0
 debug: all
 
 # ------------------------------------------------------------------
@@ -59,7 +60,7 @@ debug: all
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $^ -o $@ $(LDFLAGS)
+	$(CC) $(DEBUG_FLAGS) $^ -o $@ $(LDFLAGS)
 
 # ------------------------------------------------------------------
 # Compilation
