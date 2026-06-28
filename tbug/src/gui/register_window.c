@@ -28,7 +28,7 @@ void RegisterBoxComponent(char* my_str, int id) {
     Clay_String s_txt = (Clay_String){.isStaticallyAllocated = false, .length = 10, .chars = my_str};
 
     my_str+=10;
-    snprintf(my_str, sizeof(char) * 10, "u: %'d", (uint16_t)my_num);
+    snprintf(my_str, sizeof(char) * 10, "u: %'u", (uint16_t)my_num);
     Clay_String u_txt = (Clay_String){.isStaticallyAllocated = false, .length = 10, .chars = my_str};
 
     my_str+=10;
