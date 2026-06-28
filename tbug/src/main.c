@@ -133,6 +133,11 @@ void handleKeyBoard(Tigr* ctx) {
            break;
         }
 
+        if(c == ' ') {
+            int32_t val = GET_INPUT_VALUE(0);
+            printf("Value: %'d\n", val);
+        }
+
         /* Handle text input */
         if(current_input != -1) {
             uint32_t cursor = input_boxes[current_input]->cursor;

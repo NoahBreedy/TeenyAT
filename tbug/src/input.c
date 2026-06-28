@@ -1,4 +1,5 @@
 #include "input.h"
+#include <stdio.h>
 
 InputBox** input_boxes = NULL;
 uint16_t  total_input_boxes = 0;
@@ -58,8 +59,40 @@ void TURN_OFF_FOCUS() {
 }
 
 void SET_CURRENT_FOCUSED_ID(uint16_t id) {
-    if(id >= 0 && id < total_input_boxes) {
+    if(id < total_input_boxes) {
         current_input = id;
     }
     return;
+}
+
+void string_strip(char* dest, char* src, char* delim, uint32_t size) {
+    char* my_ptr = calloc(size, sizeof(char));
+    my_ptr = strncpy(my_ptr, src, size);
+
+    my_ptr = strtok(my_ptr, delim);
+    while(my_ptr != NULL) {
+        strncat(dest, my_ptr, strlen(my_ptr));
+        my_ptr = strtok(NULL, delim);
+    }
+
+    free(my_ptr);
+    return;
+}
+
+int32_t GET_INPUT_VALUE(uint16_t id) {
+    uint32_t result = 0;
+    if(id < total_input_boxes) {
+        char* value = input_boxes[id]->value;
+        uint32_t size = input_boxes[id]->size;
+
+        char* delimited = calloc(size, sizeof(char));
+
+        string_strip(delimited, value, ",", size);
+
+        result = strtol(delimited, NULL, 0);
+
+        free(delimited);
+    }
+
+    return result;
 }

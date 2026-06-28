@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 /* The input box library is going
  * to be a global manager of textinput boxes
@@ -43,5 +44,13 @@ void TURN_OFF_FOCUS();
  * this function also rejects values greater than total_input_boxes-1
  * */
 void SET_CURRENT_FOCUSED_ID(uint16_t id);
+
+/**
+ * Returns the value of the given input_box
+ * as a number
+ *
+ * only returns up to i32 min and i32 max
+ */
+int32_t GET_INPUT_VALUE(uint16_t id);
 
 #endif /* __INPUT_BOXES__ */
