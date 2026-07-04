@@ -3,6 +3,7 @@
 
 static const Clay_Color OUTER_COLOR = (Clay_Color) {8, 12, 25, 255};
 static const Clay_Color HEADER_COLOR = (Clay_Color) {29, 35, 42, 255};
+static const Clay_Color ACTION_BOX_COLOR = (Clay_Color) {39, 46, 56, 255};
 static const Clay_Color BOX_COLOR = (Clay_Color) {67, 84, 105, 255};
 static const Clay_Color BOX_2_COLOR = (Clay_Color) {46, 63, 84, 255};
 static const Clay_Color COLOR_ORANGE = (Clay_Color) {225, 138, 50, 255};

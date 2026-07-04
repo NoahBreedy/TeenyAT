@@ -1,5 +1,31 @@
 #include "gui/header_window.h"
 
+Clay_ElementDeclaration actionBoxConfig = (Clay_ElementDeclaration) {
+    .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
+                .sizing = { .width = CLAY_SIZING_FIXED(200),
+                            .height = CLAY_SIZING_FIXED(80) },
+                .padding  = {16, 0, 0, 0},
+                .childAlignment = { .y = CLAY_ALIGN_Y_CENTER },
+                .childGap = 16 },
+    .backgroundColor = ACTION_BOX_COLOR
+};
+
+void ActionBoxComponent(const char* my_str, char* img_url) {
+    Clay_String text = (Clay_String){.isStaticallyAllocated = true, .length = strlen(my_str), .chars = my_str};
+    CLAY_AUTO_ID(actionBoxConfig) {
+        CLAY_AUTO_ID({
+                    .layout = {
+                        .sizing = {
+                            .width = CLAY_SIZING_FIXED(80),
+                            .height = CLAY_SIZING_FIXED(80) }
+                        },
+                    .image = { .imageData = img_url } }) {
+
+        }
+        CLAY_TEXT(text, { .fontSize = 16, .textColor = {255, 255, 255, 255} });
+    }
+}
+
 void HeaderWindow() {
     CLAY(CLAY_ID("HeaderWindow"), {
         .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
@@ -17,9 +43,15 @@ void HeaderWindow() {
                             .height = CLAY_SIZING_FIXED(86) }
                         },
                     .image = { .imageData = "resources/leroy.png" } }) {
-
             }
 
             CLAY_TEXT(CLAY_STRING("TEENY BUG"), { .fontSize = 24, .textColor = {255, 255, 255, 255} });
+            
+            ActionBoxComponent("Run", "resources/Run_Button.png");
+
+            ActionBoxComponent("Step", "resources/Step_Button.png");
+
+            ActionBoxComponent("Reset", "resources/Reset_Button.png");
+
     }
 }
