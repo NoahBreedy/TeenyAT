@@ -25,6 +25,7 @@ Parser::Parser(Preprocessor& p, bool debug)
     oss << "";
     raw_line_index = 0;
     is_raw_line = false;
+    logged_binary_overlow = false;
 }
 
 void Parser::reset_lexer() {
@@ -75,6 +76,10 @@ bool is_teeny(tny_sword n) {
 void Parser::push_binary_value(tny_word value) {
     bin_words.push_back(value);
     address.u++;
+    if(bin_words.size() > TNY_MAX_RAM_ADDRESS && !logged_binary_overlow) {
+        log_warning(current, "This value pushes past TNY_MAX_RAM_ADDRESS!");
+        logged_binary_overlow = true;
+    }
 }
 
 void Parser::push_binary_instruction() {
@@ -117,6 +122,12 @@ void Parser::push_binary_instruction() {
         oss << "     ]  ";
     }
     oss << line << '\n';
+    
+    /* Log if we get to big for our britches */
+    if(bin_words.size() > TNY_MAX_RAM_ADDRESS && !logged_binary_overlow) {
+        log_warning(current, "This instruction pushes past TNY_MAX_RAM_ADDRESS!");
+        logged_binary_overlow = true;
+    }
 
 }
 
@@ -471,6 +482,7 @@ void Parser::setup_program() {
     /* clear all binary words */
     bin_words.clear();
     label_resolutions++;
+    logged_binary_overlow = false;
 
     /* reset instance count for labels */
     for (const auto& elm : labels) {
@@ -496,7 +508,7 @@ bool Parser::parse_program() {
     error_log      =  running_error_log;      // let our error_log match the running one
     warning_log    =  running_warning_log;    // let our warning_log match the running one
     binary_listing =  oss.str();  // match our binary listing to the running one
-    max_lines = std::to_string(previous.line_num).size(); // get total amount of maximum lines
+    max_lines = std::to_string(previous.line_num).size(); // get total amount of maximum line
 
     return (valid_program && pp.valid_program);
 }
