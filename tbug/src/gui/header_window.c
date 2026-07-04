@@ -25,9 +25,9 @@ void HandleActionBoxInteraction(Clay_ElementId elementId, Clay_PointerData point
 
 Clay_ElementDeclaration actionBoxConfig = (Clay_ElementDeclaration) {
     .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
-                .sizing = { .width = CLAY_SIZING_FIXED(200),
+                .sizing = { .width = CLAY_SIZING_FIXED(180),
                             .height = CLAY_SIZING_FIXED(80) },
-                .padding  = {16, 0, 0, 0},
+                .padding  = {8, 0, 0, 0},
                 .childAlignment = { .y = CLAY_ALIGN_Y_CENTER },
                 .childGap = 16 },
     .backgroundColor = ACTION_BOX_COLOR
@@ -51,7 +51,27 @@ void ActionBoxComponent(const char* my_str, char* img_url, uint8_t* component) {
     }
 }
 
-void HeaderWindow() {
+Clay_ElementDeclaration infoBoxConfig = (Clay_ElementDeclaration) {
+    .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                .sizing = { .width = CLAY_SIZING_FIXED(100),
+                            .height = CLAY_SIZING_FIXED(80) },
+                .padding  = {8, 8, 8, 8},
+                .childAlignment = { .x = CLAY_ALIGN_X_CENTER },
+                .childGap = 16 },
+    .backgroundColor = ACTION_BOX_COLOR
+};
+
+void InfoBoxComponent(const char* my_str, char* buff, uint64_t cycle_cnt) {
+    Clay_String text = (Clay_String){.isStaticallyAllocated = true, .length = strlen(my_str), .chars = my_str};
+    snprintf(buff, 32, "%'ld", cycle_cnt);
+    Clay_String value = (Clay_String){.isStaticallyAllocated = false, .length = strlen(buff), .chars = buff};
+    CLAY_AUTO_ID(infoBoxConfig) {
+        CLAY_TEXT(text, { .fontSize = 8, .textColor = {255, 255, 255, 255} });
+        CLAY_TEXT(value, { .fontSize = 8, .textColor = {255, 255, 255, 255} });
+    }
+}
+
+int HeaderWindow(char* string_arena, teenyat* t) {
     CLAY(CLAY_ID("HeaderWindow"), {
         .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
                     .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(80) },
@@ -80,6 +100,11 @@ void HeaderWindow() {
             ActionBoxComponent("Step", "resources/Step_Button.png", action_ids + 1);
 
             ActionBoxComponent("Reset", "resources/Reset_Button.png", action_ids + 2);
+            
+            InfoBoxComponent("Cycle Cnt:", string_arena, t->cycle_cnt);
 
     }
+
+    /* 32 chars */
+    return 32;
 }

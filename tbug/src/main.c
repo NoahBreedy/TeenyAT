@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 
         CLAY(CLAY_ID("OuterContainer"), outerContainerConfig) {
 
-            HeaderWindow();
+            int offset = HeaderWindow(string_arena, &t);
 
             CLAY(CLAY_ID("AsmContainer"), asmContainerConfig) {
 
@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 
                 CLAY(CLAY_ID("MemoryContainer"), memoryContainerConfig) {
 
-                    int offset = RegisterWindow(string_arena, &t);
+                    offset += RegisterWindow(string_arena + offset, &t);
 
                     MemoryWindow(string_arena + offset, &t);
 
