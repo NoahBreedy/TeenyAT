@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <sstream>
 #include <filesystem>
 
@@ -13,12 +14,23 @@
  *  TODO: work on @including relative paths so you can run ntasm from anywhere
  */
 
-#define PREFORM_TRACING false
-
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        std::cerr << "usage: assembler <file.asm | file.S>\n";
+    if (argc < 2) {
+        std::cerr << "usage: assembler <file.asm | file.S> <-trace>?\n";
         return 1;
+    }
+
+    bool PREFORM_TRACING = false;
+
+    /* hack arg parser */
+    if(argc == 3) {
+        std::string arg = argv[2];
+        if(arg == "-trace" || arg == "-t") {
+                PREFORM_TRACING = true;
+        }else {
+            std::cerr << "usage: assembler <file.asm | file.S> <-trace>?\n";
+            return 1;
+        }
     }
 
     std::filesystem::path asm_filename(argv[1]);
