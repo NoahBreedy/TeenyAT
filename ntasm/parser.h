@@ -30,6 +30,7 @@ private:
     token previous;
 
     bool valid_program;
+    bool logged_binary_overlow;
 
     tny_word bin_word_0;
     tny_word bin_word_1;
