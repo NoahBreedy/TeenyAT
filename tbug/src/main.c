@@ -75,7 +75,7 @@ int main() {
      * */
     CREATE_INPUT_BOX(6);
 
-    char* string_arena = calloc(1024, sizeof(char));
+    char* string_arena = calloc(5124, sizeof(char));
 
     uint64_t frame_cnt = 0;
     while(!tigrClosed(win) && !tigrKeyDown(win, TK_ESCAPE)) {
@@ -104,9 +104,9 @@ int main() {
 
                 CLAY(CLAY_ID("MemoryContainer"), memoryContainerConfig) {
 
-                    RegisterWindow(string_arena);
+                    int offset = RegisterWindow(string_arena);
 
-                    MemoryWindow();
+                    MemoryWindow(string_arena + offset);
 
                 }
 

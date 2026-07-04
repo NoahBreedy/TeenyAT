@@ -7,7 +7,7 @@
 #include "clay.h"
 #include "clay_colors.h"
 
-void RegisterWindow(char* string_arena);
+int RegisterWindow(char* string_arena);
 
 #endif /* __REGISTER_WINDOW__ */
 

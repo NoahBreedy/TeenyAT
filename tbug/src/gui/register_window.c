@@ -45,7 +45,8 @@ void RegisterBoxComponent(char* my_str, int id) {
     }
 }
 
-void RegisterWindow(char* string_arena) {
+int RegisterWindow(char* string_arena) {
+    int i = 0;
     CLAY(CLAY_ID("RegisterWindow"), {
             .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
                         .sizing = { .width = CLAY_SIZING_GROW(0),
@@ -58,9 +59,11 @@ void RegisterWindow(char* string_arena) {
                         .childOffset = Clay_GetScrollOffset() },
 
             .backgroundColor = BOX_COLOR }) {
-
-            for(int i = 0; i < 8; i++) {
+            
+            for(i = 0; i < 8; i++) {
                 RegisterBoxComponent(string_arena + (i * 38), i);
             }
     }
+
+    return (i * 38);
 }
