@@ -10,6 +10,8 @@ CFLAGS  := -Iinclude
 LDFLAGS := -lm
 DEBUG_FLAGS :=
 
+EXE_NAME  := tbug
+
 # Platform-specific libraries
 ifeq ($(OS),Windows_NT)
     LDFLAGS += -lopengl32 -lgdi32
@@ -60,7 +62,7 @@ debug: all
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(DEBUG_FLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(DEBUG_FLAGS) $^ -o $(BIN_DIR)/$(EXE_NAME) $(LDFLAGS)
 
 # ------------------------------------------------------------------
 # Compilation
