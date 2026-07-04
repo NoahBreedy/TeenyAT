@@ -140,6 +140,23 @@ int main(int argc, char* argv[]) {
 
         tigrUpdate(win);
 
+        /* update teenyat internals */
+        if(reset_mode) {
+            tny_reset(&t);
+            reset_mode = false;
+            stop_mode = true;
+        }
+
+        bool clock_teenyat = !stop_mode || step_mode;
+        if(clock_teenyat) {
+           if(step_mode) {
+                stop_mode = true;
+                step_mode = false;
+           }
+
+           tny_clock(&t); 
+        }
+
     }
 
     FREE_INPUTS();
