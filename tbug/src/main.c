@@ -1,6 +1,5 @@
-/* For memoery and most likely asm portion im going to need to keep track
- * of how many elements im going to display */
 #include <locale.h>
+
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
 #include "clay_colors.h"
@@ -10,6 +9,8 @@
 #include "gui/header_window.h"
 #include "gui/memory_window.h"
 #include "gui/register_window.h"
+
+#include "teenyat.h"
 
 #define KEY_BACKSPACE 0x08
 
@@ -45,7 +46,27 @@ Clay_ElementDeclaration memoryContainerConfig = (Clay_ElementDeclaration) {
     .backgroundColor = HEADER_COLOR
 };
 
-int main() {
+int main(int argc, char* argv[]) {
+    /* Require user to provide binary file */
+    if(argc != 2) {
+        printf("usage: tbug <bin_file>\n");
+        return 1;
+    }
+
+    const char* file_name = argv[1];
+
+    FILE* bin_file = fopen(file_name, "rb");
+    if(!bin_file) {
+        printf("Failed to open file: %s\n", file_name);
+        return 1;
+    }
+
+    teenyat t;
+    if(!tny_init_from_file(&t, bin_file, NULL, NULL)) {
+        printf("Failed to initialize teenyAT!\n");
+        return 1;
+    }
+
     /* Try en_US.UTF-8 locale (my wsl defaults to C.UTF-8 :( */
     char *current_locale = setlocale(LC_NUMERIC, "en_US.UTF-8");
     if(!current_locale) {
