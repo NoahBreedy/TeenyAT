@@ -11,13 +11,13 @@ void HandleActionBoxInteraction(Clay_ElementId elementId, Clay_PointerData point
 
     // Pointer state allows you to detect mouse down / hold / release
     if (pointerInfo.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        
+
         if(actionID == 0) { // RUN or STOP
-            stop_mode = !stop_mode; 
+            stop_mode = !stop_mode;
         }else if(actionID == 1) { // STEP
-            step_mode = true; 
+            step_mode = true;
         }else { // RESET
-            reset_mode = true; 
+            reset_mode = true;
         }
 
     }
@@ -69,9 +69,9 @@ void HeaderWindow() {
                         },
                     .image = { .imageData = "resources/leroy.png" } }) {
             }
-            
+
             CLAY_TEXT(CLAY_STRING("TEENY BUG"), { .fontSize = 24, .textColor = {255, 255, 255, 255} });
-            
+
             if(stop_mode)
                 ActionBoxComponent("Run", "resources/Run_Button.png", action_ids);
             else
