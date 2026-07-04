@@ -12,7 +12,7 @@ Clay_ElementDeclaration registerBoxConfig(Clay_Color col) {
     .backgroundColor = BOX_2_COLOR };
 }
 
-void RegisterBoxComponent(char* my_str, int id) {
+void RegisterBoxComponent(char* my_str, int id, tny_word reg) {
 
     const Clay_Color col_index[8] = {COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_ORANGE, COLOR_VIOLET, COLOR_CYAN, COLOR_WHITE};
 
@@ -22,17 +22,16 @@ void RegisterBoxComponent(char* my_str, int id) {
 
     Clay_String reg_txt = (Clay_String){.isStaticallyAllocated = false, .length = 8, .chars = my_str};
 
-    int my_num = -1;
     my_str+=8;
-    snprintf(my_str, sizeof(char) * 10, "s: %'d", my_num);
+    snprintf(my_str, sizeof(char) * 10, "s: %'d", reg.s);
     Clay_String s_txt = (Clay_String){.isStaticallyAllocated = false, .length = 10, .chars = my_str};
 
     my_str+=10;
-    snprintf(my_str, sizeof(char) * 10, "u: %'u", (uint16_t)my_num);
+    snprintf(my_str, sizeof(char) * 10, "u: %'u", reg.u);
     Clay_String u_txt = (Clay_String){.isStaticallyAllocated = false, .length = 10, .chars = my_str};
 
     my_str+=10;
-    snprintf(my_str, sizeof(char) * 10, "char: %c", (char)my_num);
+    snprintf(my_str, sizeof(char) * 10, "char: %c", (char)reg.s);
     Clay_String c_txt = (Clay_String){.isStaticallyAllocated = false, .length = 10, .chars = my_str};
 
     const int h_size = 12;
@@ -45,8 +44,9 @@ void RegisterBoxComponent(char* my_str, int id) {
     }
 }
 
-int RegisterWindow(char* string_arena) {
+int RegisterWindow(char* string_arena, teenyat* t) {
     int i = 0;
+    uint8_t reg_index[8] = {TNY_REG_A, TNY_REG_B, TNY_REG_C, TNY_REG_D, TNY_REG_E, TNY_REG_PC, TNY_REG_SP, TNY_REG_ZERO};
     CLAY(CLAY_ID("RegisterWindow"), {
             .layout = { .layoutDirection = CLAY_LEFT_TO_RIGHT,
                         .sizing = { .width = CLAY_SIZING_GROW(0),
@@ -59,9 +59,9 @@ int RegisterWindow(char* string_arena) {
                         .childOffset = Clay_GetScrollOffset() },
 
             .backgroundColor = BOX_COLOR }) {
-            
+
             for(i = 0; i < 8; i++) {
-                RegisterBoxComponent(string_arena + (i * 38), i);
+                RegisterBoxComponent(string_arena + (i * 38), i, t->reg[reg_index[i]]);
             }
     }
 

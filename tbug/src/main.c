@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 
                 CLAY(CLAY_ID("MemoryContainer"), memoryContainerConfig) {
 
-                    int offset = RegisterWindow(string_arena);
+                    int offset = RegisterWindow(string_arena, &t);
 
                     MemoryWindow(string_arena + offset);
 
