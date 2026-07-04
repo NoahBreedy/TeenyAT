@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
 
                     int offset = RegisterWindow(string_arena, &t);
 
-                    MemoryWindow(string_arena + offset);
+                    MemoryWindow(string_arena + offset, &t);
 
                 }
 

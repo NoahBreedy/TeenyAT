@@ -8,6 +8,8 @@
 #include "input.h"
 #include "clay_colors.h"
 
+#include "teenyat.h"
+
 #define MAX_BOXES 100
 
 /* typesafe safe macro for min of two values */
@@ -16,7 +18,7 @@
            typeof (b) _b = (b); \
          _a > _b ? _b : _a; })
 
-void MemoryWindow(char* string_arena);
+void MemoryWindow(char* string_arena, teenyat* t);
 
 #endif /* __MEMORY_WINDOW__ */
 
